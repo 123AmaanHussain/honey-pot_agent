@@ -18,6 +18,8 @@ model = genai.GenerativeModel('models/gemini-flash-latest')
 
 # 🧠 STEP 2 — Decide “MODE”
 def decide_mode(confidence):
+    if not 0 <= confidence <= 1:
+        raise ValueError("confidence must be between 0 and 1")
     if confidence < 0.25:
         return "EXIT"
     elif confidence < 0.5:
