@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 🔑 STEP 1 — Set Up Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    raise RuntimeError("GEMINI_API_KEY is required")
+genai.configure(api_key=api_key)
 
 # We use 'gemini-flash-latest' which points to the stable 1.5 Flash model
 # This model is faster and has higher rate limits than 2.0
