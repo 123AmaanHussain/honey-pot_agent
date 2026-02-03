@@ -4,9 +4,18 @@
 # Collection of curl commands to test all endpoints
 # ============================================================
 
-# Configuration
-API_KEY="test_secret_key_12345"
-BASE_URL="http://localhost:8000"
+# Load configuration from .env file
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | grep 'API_KEY=' | xargs)
+    export $(grep -v '^#' .env | grep 'BASE_URL=' | xargs) 2>/dev/null || true
+else
+    echo "⚠️  Warning: .env file not found. Please create one with API_KEY set."
+    echo "Example: API_KEY=your_api_key_here"
+    exit 1
+fi
+
+# Use BASE_URL from .env or default to localhost
+BASE_URL="${BASE_URL:-http://localhost:8000}"
 
 echo "🧪 Honey-Pot API Test Suite"
 echo "======================================"
