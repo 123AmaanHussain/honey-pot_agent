@@ -24,6 +24,10 @@ URL_PATTERN = re.compile(
     re.IGNORECASE
 )
 
+BANK_ACCOUNT_PATTERN = re.compile(
+    r'\b\d{9,18}\b'  # Indian bank accounts are typically 9-18 digits
+)
+
 # Common UPI providers for validation
 UPI_PROVIDERS = [
     'paytm', 'phonepe', 'googlepay', 'ybl', 'oksbi', 'okhdfcbank', 
@@ -105,6 +109,38 @@ def extract_urls(text: str) -> List[str]:
     return list(set(matches))  # Remove duplicates
 
 
+def extract_bank_accounts(text: str) -> List[str]:
+    """
+    Extract bank account numbers from text.
+    Indian bank accounts are typically 9-18 digits.
+    
+    Args:
+        text: Input text to extract from
+        
+    Returns:
+        List of extracted bank account numbers
+    """
+    matches = BANK_ACCOUNT_PATTERN.findall(text)
+    
+    # Filter out phone numbers (10 digits) and common numbers
+    valid_accounts = []
+    for match in matches:
+        # Skip if it's exactly 10 digits (likely a phone number)
+        if len(match) == 10:
+            continue
+        # Skip very short numbers (likely not bank accounts)
+        if len(match) < 9:
+            continue
+        # Skip numbers that are all the same digit
+        if len(set(match)) == 1:
+            continue
+            
+        valid_accounts.append(match)
+        logger.info(f"Extracted bank account: {match[:4]}****{match[-4:]}")
+    
+    return list(set(valid_accounts))  # Remove duplicates
+
+
 def extract_suspicious_keywords(text: str, detected_flags: List[str]) -> List[str]:
     """
     Extract suspicious keywords from detected flags.
@@ -141,6 +177,7 @@ def extract_all_intelligence(text: str, detection_flags: List[str] = None) -> Di
         "upiIds": extract_upi_ids(text),
         "phoneNumbers": extract_phone_numbers(text),
         "phishingLinks": extract_urls(text),
+        "bankAccounts": extract_bank_accounts(text),
         "suspiciousKeywords": extract_suspicious_keywords(text, detection_flags or [])
     }
     
@@ -153,6 +190,7 @@ def extract_all_intelligence(text: str, detection_flags: List[str] = None) -> Di
                 "upi_ids": len(intelligence["upiIds"]),
                 "phone_numbers": len(intelligence["phoneNumbers"]),
                 "urls": len(intelligence["phishingLinks"]),
+                "bank_accounts": len(intelligence["bankAccounts"]),
                 "keywords": len(intelligence["suspiciousKeywords"]),
             }
         )
@@ -173,7 +211,7 @@ def merge_intelligence(existing: Dict[str, List[str]], new: Dict[str, List[str]]
     """
     merged = {}
     
-    for key in ["upiIds", "phoneNumbers", "phishingLinks", "suspiciousKeywords"]:
+    for key in ["upiIds", "phoneNumbers", "phishingLinks", "bankAccounts", "suspiciousKeywords", "scannedText"]:
         # Combine and remove duplicates
         combined = list(set(existing.get(key, []) + new.get(key, [])))
         merged[key] = combined

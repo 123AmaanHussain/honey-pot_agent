@@ -1,4 +1,3 @@
-venv/
 # Environment variables (CRITICAL - contains API keys)
 .env
 .env.local
@@ -51,3 +50,13 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# Development artifacts (not for production)
+.gemini/
+brain/
+*.draft
+*.notes
+
+# Test outputs
+test_results/
+coverage_reports/

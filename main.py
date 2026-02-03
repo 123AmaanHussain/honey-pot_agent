@@ -20,16 +20,17 @@ from models import (
     IncomingRequest, MessageResponse, ErrorResponse,
     HealthResponse, DetailedHealthResponse, MetricsResponse,
     SessionResponse, SessionData, ExtractedIntelligence,
-    IntelligenceResponse
+    IntelligenceResponse, ScammerType
 )
 from middleware import (
     RequestIDMiddleware, RequestLoggingMiddleware,
     SecurityHeadersMiddleware, RateLimitMiddleware
 )
 from detection import detect_scam, update_confidence
-from agent import generate_reply, generate_exit_message
+from agent import generate_reply, generate_exit_message, profile_scammer
 from callback import send_final_callback
 from extraction import extract_all_intelligence, merge_intelligence
+from webhook_manager import EventManager
 
 
 # -------------------------
@@ -340,6 +341,7 @@ async def get_intelligence(
     all_upi_ids = []
     all_phone_numbers = []
     all_phishing_links = []
+    all_bank_accounts = []
     all_keywords = []
     sessions_with_data = []
     scam_count = 0
@@ -352,6 +354,7 @@ async def get_intelligence(
             extracted.upiIds or 
             extracted.phoneNumbers or 
             extracted.phishingLinks or 
+            extracted.bankAccounts or 
             extracted.suspiciousKeywords
         )
         
@@ -361,6 +364,8 @@ async def get_intelligence(
                 "confidence": session_data.confidence,
                 "turns": session_data.turns,
                 "completed": session_data.completed,
+                "scammer_type": session_data.scammer_type,
+                "scammer_profile": session_data.scammer_profile,
                 "extracted": extracted.dict(),
                 "created_at": session_data.created_at.isoformat() if session_data.created_at else None,
             })
@@ -369,6 +374,7 @@ async def get_intelligence(
             all_upi_ids.extend(extracted.upiIds)
             all_phone_numbers.extend(extracted.phoneNumbers)
             all_phishing_links.extend(extracted.phishingLinks)
+            all_bank_accounts.extend(extracted.bankAccounts)
             all_keywords.extend(extracted.suspiciousKeywords)
         
         # Count scam sessions (confidence < 1.0)
@@ -380,6 +386,7 @@ async def get_intelligence(
         upiIds=list(set(all_upi_ids)),  # Remove duplicates
         phoneNumbers=list(set(all_phone_numbers)),
         phishingLinks=list(set(all_phishing_links)),
+        bankAccounts=list(set(all_bank_accounts)),
         suspiciousKeywords=list(set(all_keywords))
     )
     
@@ -388,11 +395,13 @@ async def get_intelligence(
         "unique_upi_ids": len(aggregated.upiIds),
         "unique_phone_numbers": len(aggregated.phoneNumbers),
         "unique_phishing_links": len(aggregated.phishingLinks),
+        "unique_bank_accounts": len(aggregated.bankAccounts),
         "unique_keywords": len(aggregated.suspiciousKeywords),
         "total_unique_items": (
             len(aggregated.upiIds) + 
             len(aggregated.phoneNumbers) + 
             len(aggregated.phishingLinks) + 
+            len(aggregated.bankAccounts) + 
             len(aggregated.suspiciousKeywords)
         )
     }
@@ -419,6 +428,20 @@ async def get_intelligence(
 # -------------------------
 # Main Honeypot Endpoint
 # -------------------------
+
+@app.get("/session/{session_id}", response_model=SessionResponse, tags=["Sessions"])
+async def get_session_details(session_id: str, x_api_key: str = Depends(verify_api_key)):
+    """Get detailed information about a specific session."""
+    if session_id not in SESSIONS:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    session = SESSIONS[session_id]
+    return SessionResponse(
+        status="success",
+        session_id=session_id,
+        data=session
+    )
+
 
 @app.post("/honeypot/message", response_model=MessageResponse, tags=["Honeypot"])
 async def handle_message(
@@ -525,6 +548,10 @@ async def handle_message(
     if "threat" in detection["flags"]:
         session.behavior_patterns["threat"] = session.behavior_patterns.get("threat", 0) + 1
     
+    # Trigger Aggression Webhook
+    if detection.get("escalation"):
+        EventManager.notify_aggression_detected(session_id, detection["escalation"])
+    
     # Update session confidence with enhanced decay
     session.confidence = update_confidence(
         session.confidence,
@@ -535,11 +562,43 @@ async def handle_message(
     
     # Extract intelligence
     new_intelligence = extract_all_intelligence(message_text, detection["flags"])
+    
+    # Check if NEW text-based intelligence was found
+    has_new_intel = any(
+        (len(new_intelligence.get(k, [])) > 0 and 
+         any(item not in session.extracted.dict().get(k, []) for item in new_intelligence[k]))
+        for k in ["upiIds", "phoneNumbers", "phishingLinks", "bankAccounts"]
+    )
+    
+    if has_new_intel:
+        EventManager.notify_intel_extracted(session_id, new_intelligence)
+        
     session.extracted = ExtractedIntelligence(
         **merge_intelligence(session.extracted.dict(), new_intelligence)
     )
     
     session.turns += 1
+    
+    # -------------------------
+    # Scammer Profiling (Experimental)
+    # -------------------------
+    # Profile the scammer after a few turns to understand their tactics
+    if session.turns >= 2 and session.scammer_type == ScammerType.UNKNOWN:
+        try:
+            scammer_type, profile = profile_scammer(session.message_history)
+            if scammer_type != ScammerType.UNKNOWN:
+                session.scammer_type = scammer_type
+                session.scammer_profile = profile
+                logger.info(
+                    f"Scammer profiled successfully",
+                    extra={
+                        "session_id": session_id,
+                        "type": scammer_type.value,
+                        "profile": profile
+                    }
+                )
+        except Exception as e:
+            logger.error(f"Failed to profile scammer: {e}")
     
     # -------------------------
     # Intelligent Exit Strategy
@@ -554,7 +613,9 @@ async def handle_message(
         has_critical_intel = (
             len(session.extracted.upiIds) > 0 or
             len(session.extracted.phoneNumbers) > 0 or
-            len(session.extracted.phishingLinks) > 0
+            len(session.extracted.phishingLinks) > 0 or
+            len(session.extracted.bankAccounts) > 0 or
+            len(session.extracted.scannedText) > 0
         )
         if has_critical_intel and session.turns >= 3:
             return True, "intelligence_collected"
@@ -578,13 +639,18 @@ async def handle_message(
                 "intelligence_items": (
                     len(session.extracted.upiIds) +
                     len(session.extracted.phoneNumbers) +
-                    len(session.extracted.phishingLinks)
+                    len(session.extracted.phishingLinks) +
+                    len(session.extracted.bankAccounts) +
+                    len(session.extracted.scannedText)
                 ),
             }
         )
         
         # Send final callback (uses settings defaults)
         send_final_callback(session_id, session.dict())
+        
+        # Also trigger real-time completion webhook
+        EventManager.notify_session_completed(session_id, session.dict())
         
         session.completed = True
         
@@ -596,12 +662,20 @@ async def handle_message(
     else:
         # Generate intelligent reply with persona switching
         try:
-            reply, new_persona = generate_reply(
+            # Generate intelligent reply with persona switching and vision support
+            reply, new_persona, scanned_intel = generate_reply(
                 confidence=session.confidence,
                 last_message=message_text,
                 current_persona=session.current_persona,
-                extracted_intelligence=session.extracted.dict()
+                extracted_intelligence=session.extracted.dict(),
+                image_data=payload.message.imageData
             )
+            
+            # Merge scanned intelligence if any
+            if scanned_intel:
+                session.extracted.scannedText = list(set(session.extracted.scannedText + scanned_intel))
+                # Trigger webhook for intel-from-image
+                EventManager.notify_intel_extracted(session_id, {"scannedText": scanned_intel})
             
             # Track persona changes
             if new_persona != session.current_persona:

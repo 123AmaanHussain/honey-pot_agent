@@ -3,7 +3,18 @@ Enhanced Pydantic models for request/response validation.
 """
 from datetime import datetime
 from typing import Dict, List, Optional
+from enum import Enum
 from pydantic import BaseModel, Field, validator
+
+
+class ScammerType(str, Enum):
+    """Types of scams identified."""
+    UNKNOWN = "unknown"
+    TECH_SUPPORT = "tech_support"
+    BANKING = "banking"
+    PRIZE_LOTTERY = "prize_lottery"
+    ROMANCE = "romance"
+    JOB = "job"
 
 
 # -------------------------
@@ -15,6 +26,7 @@ class Message(BaseModel):
     sender: str = Field(..., description="Message sender identifier")
     text: str = Field(..., min_length=1, description="Message text content")
     timestamp: str = Field(..., description="Message timestamp in ISO format")
+    imageData: Optional[str] = Field(None, description="Base64 encoded image data for OCR/Vision")
     
     @validator("text")
     def validate_text_not_empty(cls, v):
@@ -70,7 +82,9 @@ class ExtractedIntelligence(BaseModel):
     upiIds: List[str] = Field(default_factory=list, description="Extracted UPI IDs")
     phoneNumbers: List[str] = Field(default_factory=list, description="Extracted phone numbers")
     phishingLinks: List[str] = Field(default_factory=list, description="Extracted phishing links")
+    bankAccounts: List[str] = Field(default_factory=list, description="Extracted bank account numbers")
     suspiciousKeywords: List[str] = Field(default_factory=list, description="Detected suspicious keywords")
+    scannedText: List[str] = Field(default_factory=list, description="Text extracted from images (OCR)")
 
 
 class SessionData(BaseModel):
@@ -89,6 +103,10 @@ class SessionData(BaseModel):
     # Behavior pattern tracking
     behavior_patterns: Dict[str, int] = Field(default_factory=dict, description="Detected scammer behavior patterns")
     message_history: List[str] = Field(default_factory=list, description="Recent message history for pattern detection")
+    
+    # Scammer profiling
+    scammer_type: ScammerType = Field(default=ScammerType.UNKNOWN, description="Identified type of scam")
+    scammer_profile: Optional[str] = Field(default=None, description="Detailed profile/category description")
     
     def update_activity(self):
         """Update last activity timestamp."""
@@ -169,6 +187,8 @@ class CallbackPayload(BaseModel):
     extractedIntelligence: ExtractedIntelligence = Field(..., description="Extracted intelligence data")
     agentNotes: str = Field(..., description="Agent notes about the interaction")
     finalConfidence: Optional[float] = Field(None, description="Final confidence score")
+    scammerType: ScammerType = Field(default=ScammerType.UNKNOWN, description="Identified type of scam")
+    scammerProfile: Optional[str] = Field(None, description="Detailed profile description")
 
 
 # -------------------------

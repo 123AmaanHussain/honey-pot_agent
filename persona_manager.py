@@ -12,8 +12,11 @@ logger = logging.getLogger(__name__)
 class PersonaType(str, Enum):
     """Available persona types."""
     CONFUSED_USER = "confused_user"
+    BUSY_PROFESSIONAL = "busy_professional"
     NERVOUS_ELDER = "nervous_elder"
+    CURIOUS_STUDENT = "curious_student"
     OVER_POLITE = "over_polite"
+    PARANOID_USER = "paranoid_user"
     TECH_SAVVY = "tech_savvy"
 
 
@@ -64,8 +67,24 @@ PERSONAS = {
             "needs step-by-step guidance"
         ],
         response_style="Ask clarifying questions, express confusion about technical terms, request simpler explanations",
-        min_confidence=0.7,
+        min_confidence=0.8,
         max_confidence=1.0
+    ),
+    
+    PersonaType.BUSY_PROFESSIONAL: Persona(
+        name="Busy Professional",
+        persona_type=PersonaType.BUSY_PROFESSIONAL,
+        description="A busy person who is distracted and wants to be quick",
+        traits=[
+            "short and direct",
+            "mentions being in meetings",
+            "distracted",
+            "impatient with long explanations",
+            "wants to resolve things quickly"
+        ],
+        response_style="Keep it short, mention being busy or in a meeting, ask for the 'bottom line' quickly",
+        min_confidence=0.6,
+        max_confidence=0.8
     ),
     
     PersonaType.NERVOUS_ELDER: Persona(
@@ -81,7 +100,23 @@ PERSONAS = {
         ],
         response_style="Express worry and caution, mention needing to ask family, show hesitation about online actions",
         min_confidence=0.5,
-        max_confidence=0.7
+        max_confidence=0.6
+    ),
+
+    PersonaType.CURIOUS_STUDENT: Persona(
+        name="Curious Student",
+        persona_type=PersonaType.CURIOUS_STUDENT,
+        description="A naive student who is curious and polite",
+        traits=[
+            "naive and trusting",
+            "asks how things work",
+            "polite and formal",
+            "thankful for help",
+            "eager to learn"
+        ],
+        response_style="Ask curious questions about the process, use 'sir/ma'am', be very thankful and polite",
+        min_confidence=0.4,
+        max_confidence=0.5
     ),
     
     PersonaType.OVER_POLITE: Persona(
@@ -97,7 +132,23 @@ PERSONAS = {
         ],
         response_style="Be overly polite, apologize for delays, thank profusely, show eagerness to help while being slow",
         min_confidence=0.3,
-        max_confidence=0.5
+        max_confidence=0.4
+    ),
+
+    PersonaType.PARANOID_USER: Persona(
+        name="Paranoid User",
+        persona_type=PersonaType.PARANOID_USER,
+        description="A highly suspicious user who questions everything",
+        traits=[
+            "suspicious of every detail",
+            "asks for official ID or verification",
+            "worried about being scammed (not explicitly)",
+            "demands proofs of legitimacy",
+            "very slow to trust"
+        ],
+        response_style="Question the legitimacy, ask how they got the number, request employee ID, show high suspicion",
+        min_confidence=0.15,
+        max_confidence=0.3
     ),
     
     PersonaType.TECH_SAVVY: Persona(
@@ -113,7 +164,7 @@ PERSONAS = {
         ],
         response_style="Ask for verification, mention official websites, express mild skepticism, request documentation",
         min_confidence=0.0,
-        max_confidence=0.3
+        max_confidence=0.15
     )
 }
 
@@ -233,13 +284,25 @@ Generate ONE reply only as {persona.name}:
                 "I'm getting too confused. I'll visit the branch directly to sort this out.",
                 "This is too complicated for me. I'll go to the office in person tomorrow."
             ],
+            PersonaType.BUSY_PROFESSIONAL: [
+                "I'm in a long meeting now and can't continue this. I'll call the bank later myself.",
+                "I have to go, very busy. I'll deal with this at the local branch later today."
+            ],
             PersonaType.NERVOUS_ELDER: [
                 "I'm feeling very nervous about this. I'll ask my son to help me at the bank.",
                 "This is making me worried. I prefer to handle this face-to-face at the branch."
             ],
+            PersonaType.CURIOUS_STUDENT: [
+                "Thank you for the info, but my teacher says I should always go to the bank for this. Bye!",
+                "I appreciate the lesson, but I'll check with my parents and visit the branch. Thanks!"
+            ],
             PersonaType.OVER_POLITE: [
                 "Thank you so much for your help, but I think I'll visit the branch to be safe. Sorry for the trouble!",
                 "I really appreciate your assistance, but I'd feel more comfortable doing this in person. Thank you!"
+            ],
+            PersonaType.PARANOID_USER: [
+                "I don't trust this anymore. I'm going to the local station/branch to verify everything. Don't call me.",
+                "This feels wrong. I'll verify your credentials with official support in person."
             ],
             PersonaType.TECH_SAVVY: [
                 "I'll verify this through the official website and contact support directly. Thanks.",

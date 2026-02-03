@@ -88,6 +88,20 @@ class Settings(BaseSettings):
         description="Number of retry attempts for callback"
     )
     
+    # Webhook Configuration
+    webhook_enabled: bool = Field(
+        default=True,
+        description="Enable real-time webhooks"
+    )
+    webhook_url: Optional[str] = Field(
+        default=None,
+        description="URL for real-time notifications"
+    )
+    webhook_timeout: int = Field(
+        default=5,
+        description="Webhook request timeout in seconds"
+    )
+    
     # Detection Configuration
     scam_confidence_threshold: float = Field(
         default=0.4,

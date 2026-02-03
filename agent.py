@@ -4,10 +4,12 @@ import logging
 import google.generativeai as genai
 from google.api_core import exceptions
 from dotenv import load_dotenv
-from typing import Optional, Dict
+from typing import Optional, Dict, List, Any
+import base64
 
 from config import get_settings
 from persona_manager import get_persona_manager
+from models import ScammerType
 
 load_dotenv()
 
@@ -84,19 +86,11 @@ def generate_reply(
     confidence: float,
     last_message: str = "Hello",
     current_persona: Optional[str] = None,
-    extracted_intelligence: Optional[Dict] = None
-) -> tuple[str, str]:
+    extracted_intelligence: Optional[Dict] = None,
+    image_data: Optional[str] = None
+) -> tuple[str, str, List[str]]:
     """
-    Generate agent reply based on confidence score with persona switching.
-    
-    Args:
-        confidence: Current confidence score (0.0 to 1.0)
-        last_message: The last message from scammer
-        current_persona: Current persona type (if any)
-        extracted_intelligence: Extracted intelligence data
-        
-    Returns:
-        Tuple of (reply text, persona type)
+    Generate agent reply with optional image processing.
     """
     # Select appropriate persona
     persona = persona_manager.select_persona(confidence, current_persona)
@@ -105,17 +99,13 @@ def generate_reply(
     topic = detect_topic(last_message)
     mode = decide_mode(confidence)
     
-    logger.info(
-        f"Generating reply",
-        extra={
-            "confidence": confidence,
-            "mode": mode,
-            "topic": topic,
-            "persona": persona.persona_type.value,
-        }
-    )
+    scanned_intelligence = []
+    if image_data:
+        scanned_intelligence = process_image_for_intel(image_data)
+        if scanned_intelligence:
+            logger.info(f"Vision analysis extracted {len(scanned_intelligence)} items")
     
-    # Build prompt with persona context
+    # ... prompt building ...
     prompt = persona_manager.build_persona_prompt(
         persona=persona,
         topic=topic,
@@ -123,10 +113,52 @@ def generate_reply(
         scammer_message=last_message
     )
     
+    # If we have scanned intel, add it to the prompt context
+    if scanned_intelligence:
+        prompt = f"Additional Context from Image OCR: {', '.join(scanned_intelligence)}\n\n{prompt}"
+    
     # Generate reply
     reply = call_llm(prompt)
     
-    return reply, persona.persona_type.value
+    return reply, persona.persona_type.value, scanned_intelligence
+
+
+def process_image_for_intel(base64_image: str) -> List[str]:
+    """
+    Use Gemini Vision to extract text, QR codes, and logos.
+    """
+    try:
+        # Decode base64 to parts
+        image_parts = [
+            {
+                "mime_type": "image/jpeg",  # Assume JPEG, could be improved
+                "data": base64_image
+            }
+        ]
+        
+        prompt = """
+        Analyze this image for scam indicators. 
+        Extract any of the following if found:
+        - Bank account numbers
+        - UPI IDs
+        - Phone numbers
+        - Any visible text related to money or threats
+        - Any website links or QR code content
+        
+        Return ONLY a comma-separated list of extracted items. If none, return 'None'.
+        """
+        
+        response = model.generate_content([prompt, image_parts[0]])
+        result = response.text.strip()
+        
+        if result.lower() == "none":
+            return []
+            
+        return [item.strip() for item in result.split(",")]
+        
+    except Exception as e:
+        logger.error(f"Vision processing failed: {e}")
+        return []
 
 
 def generate_exit_message(
@@ -164,4 +196,66 @@ def generate_exit_message(
     )
     
     return exit_message
+
+
+def profile_scammer(message_history: List[str]) -> tuple[ScammerType, str]:
+    """
+    Analyze message history to profile the scammer type.
+    
+    Args:
+        message_history: List of messages in the conversation
+        
+    Returns:
+        Tuple of (ScammerType, profile_description)
+    """
+    if not message_history:
+        return ScammerType.UNKNOWN, "Insufficient conversation history"
+
+    history_text = "\n".join(message_history[-5:])  # Use last 5 messages
+    
+    prompt = f"""
+Analyze the following conversation history and categorize the scammer's approach:
+"{history_text}"
+
+Categorize into exactly ONE of these types:
+- TECH_SUPPORT: Impersonating Microsoft, Google, Apple, Antivirus, tech support.
+- BANKING: Impersonating a bank, credit card company, or financial institution.
+- PRIZE_LOTTERY: Claiming the user won a prize, lottery, or windfall.
+- ROMANCE: Attempting to build a relationship or emotional bond.
+- JOB: Offering fake job opportunities or tasks for money.
+- UNKNOWN: If none of the above match clearly.
+
+Also provide a brief (1 sentence) description of their specific tactics (e.g., "Using fear of account suspension to demand immediate UPI payment").
+
+Format:
+TYPE: [ONE_OF_THE_ABOVE_TYPES]
+PROFILE: [BRIEF_DESCRIPTION]
+"""
+
+    result = call_llm(prompt)
+    
+    # Parse results
+    scammer_type = ScammerType.UNKNOWN
+    profile = "No profile generated"
+    
+    lines = result.split("\n")
+    for line in lines:
+        if line.startswith("TYPE:"):
+            type_str = line.replace("TYPE:", "").strip().upper()
+            try:
+                scammer_type = ScammerType[type_str]
+            except KeyError:
+                # Handle potential mismatch
+                if "TECH" in type_str: scammer_type = ScammerType.TECH_SUPPORT
+                elif "BANK" in type_str: scammer_type = ScammerType.BANKING
+                elif "PRIZE" in type_str: scammer_type = ScammerType.PRIZE_LOTTERY
+                elif "ROMANCE" in type_str: scammer_type = ScammerType.ROMANCE
+                elif "JOB" in type_str: scammer_type = ScammerType.JOB
+        
+        if line.startswith("PROFILE:"):
+            profile = line.replace("PROFILE:", "").strip()
+
+    logger.info(f"Scammer profiled: {scammer_type.value}", extra={"profile": profile})
+    
+    return scammer_type, profile
 
