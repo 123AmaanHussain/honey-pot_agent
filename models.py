@@ -81,6 +81,12 @@ class IncomingRequest(BaseModel):
 # Response Models
 # -------------------------
 
+class SimpleMessageResponse(BaseModel):
+    """Simplified response model for organizer compatibility."""
+    status: str = Field(..., description="Response status")
+    reply: Optional[str] = Field(None, description="Agent's reply to the message")
+
+
 class MessageResponse(BaseModel):
     """Response model for message handling."""
     status: str = Field(default="success", description="Response status")

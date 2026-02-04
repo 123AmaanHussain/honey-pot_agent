@@ -464,13 +464,16 @@ async def get_session_details(session_id: str, x_api_key: str = Depends(verify_a
     )
 
 
-@app.post("/honeypot/message", response_model=MessageResponse, tags=["Honeypot"])
+@app.post("/honeypot/message", tags=["Honeypot"])
 async def handle_message(
     request: Request,
     api_key: str = Depends(verify_api_key)
 ):
     """
     Process incoming scam message and generate intelligent response.
+    
+    ORGANIZER-COMPATIBLE ENDPOINT
+    Returns simple format: {"status": "success", "reply": "..."}
     
     This endpoint:
     1. Detects scam indicators in the message
@@ -742,14 +745,10 @@ async def handle_message(
         }
     )
     
-    return MessageResponse(
-        status="success",
-        reply=reply,
-        confidence=session.confidence,
-        session_id=session_id,
-        turns=session.turns,
-        agent_engaged=True,
-        scam_detected=True
+    # Return simple format for organizers
+    return {
+        "status": "success",
+        "reply": reply
     )
 
 
