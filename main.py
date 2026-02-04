@@ -494,16 +494,36 @@ async def handle_message(
     except Exception as e:
         logger.error(f"Could not read raw body: {e}")
     
-    # Parse and validate payload
+    
+    # Parse and validate payload - ULTRA PERMISSIVE for organizer compatibility
     try:
         body_json = await request.json()
-        payload = IncomingRequest(**body_json)
+        logger.info(f"Received JSON keys: {list(body_json.keys())}")
+        
+        # Extract fields manually (permissive)
+        session_id = body_json.get("sessionId") or body_json.get("session_id") or "unknown"
+        
+        # Handle message field
+        message_obj = body_json.get("message", {})
+        if isinstance(message_obj, dict):
+            message_text = message_obj.get("text", "")
+        else:
+            message_text = str(message_obj)
+        
+        # Validate we have minimum required data
+        if not message_text or not message_text.strip():
+            raise HTTPException(status_code=400, detail="Message text is required")
+            
+        logger.info(f"Extracted - session_id: {session_id}, message: {message_text[:50]}")
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Invalid JSON: {str(e)}")
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Validation error: {str(e)}", extra={"request_id": request_id})
-        raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
-    
-    session_id = payload.sessionId
-    message_text = payload.message.text
+        logger.error(f"Unexpected error parsing request: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
     
     logger.info(
         f"Processing message",
