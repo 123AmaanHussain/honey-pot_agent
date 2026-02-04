@@ -25,7 +25,7 @@ class Message(BaseModel):
     """Message model for incoming messages."""
     sender: str = Field(default="scammer", description="Message sender identifier")
     text: str = Field(..., min_length=1, description="Message text content")
-    timestamp: Optional[str] = Field(default=None, description="Message timestamp in ISO format")
+    timestamp: Optional[int | str] = Field(default=None, description="Message timestamp (epoch ms or ISO string)")
     imageData: Optional[str] = Field(None, description="Base64 encoded image data for OCR/Vision")
     
     class Config:
@@ -39,10 +39,35 @@ class Message(BaseModel):
         return v.strip()
 
 
+class ConversationMessage(BaseModel):
+    """Model for messages in conversation history."""
+    sender: str
+    text: str
+    timestamp: Optional[int | str] = None
+    
+    class Config:
+        extra = "ignore"
+
+
+class Metadata(BaseModel):
+    """Optional metadata from organizers."""
+    channel: Optional[str] = None
+    language: Optional[str] = None
+    locale: Optional[str] = None
+    
+    class Config:
+        extra = "ignore"
+
+
 class IncomingRequest(BaseModel):
     """Request model for incoming honeypot messages."""
     sessionId: str = Field(..., min_length=1, description="Unique session identifier")
     message: Message = Field(..., description="Message object")
+    conversationHistory: Optional[List[ConversationMessage]] = Field(default_factory=list, description="Previous messages in conversation")
+    metadata: Optional[Metadata] = Field(default=None, description="Optional metadata (channel, language, locale)")
+    
+    class Config:
+        extra = "ignore"  # Ignore any extra fields
     
     @validator("sessionId")
     def validate_session_id(cls, v):
