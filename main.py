@@ -5,6 +5,7 @@ AI-powered agentic system that detects scam messages and autonomously engages sc
 import os
 import logging
 import time
+import json
 from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import Dict
@@ -423,6 +424,26 @@ async def get_intelligence(
         unique_counts=unique_counts,
         sessions_with_intelligence=sessions_with_data
     )
+
+
+# -------------------------
+# Debug Endpoint (for organizer testing)
+# -------------------------
+
+@app.post("/honeypot/message/debug", tags=["Debug"])
+async def debug_message(request: Request, api_key: str = Depends(verify_api_key)):
+    """Debug endpoint to see exactly what organizers are sending."""
+    try:
+        body = await request.json()
+        logger.info(f"DEBUG - Received body: {json.dumps(body, indent=2)}")
+        return {
+            "status": "debug_success",
+            "received": body,
+            "message": "This is a debug endpoint. Use /honeypot/message for actual testing."
+        }
+    except Exception as e:
+        logger.error(f"DEBUG - Error: {str(e)}")
+        return {"status": "debug_error", "error": str(e)}
 
 
 # -------------------------
