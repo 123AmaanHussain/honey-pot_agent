@@ -749,7 +749,7 @@ async def handle_message(
     return {
         "status": "success",
         "reply": reply
-    )
+    }
 
 
 # -------------------------
