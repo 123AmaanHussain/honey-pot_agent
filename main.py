@@ -445,7 +445,6 @@ async def get_session_details(session_id: str, x_api_key: str = Depends(verify_a
 
 @app.post("/honeypot/message", response_model=MessageResponse, tags=["Honeypot"])
 async def handle_message(
-    payload: IncomingRequest,
     request: Request,
     api_key: str = Depends(verify_api_key)
 ):
@@ -463,6 +462,22 @@ async def handle_message(
     """
     settings = get_settings()
     request_id = getattr(request.state, "request_id", "unknown")
+    
+    # Get raw body for debugging
+    try:
+        raw_body = await request.body()
+        logger.info(f"Raw request body: {raw_body.decode('utf-8')[:500]}")
+    except Exception as e:
+        logger.error(f"Could not read raw body: {e}")
+    
+    # Parse and validate payload
+    try:
+        body_json = await request.json()
+        payload = IncomingRequest(**body_json)
+    except Exception as e:
+        logger.error(f"Validation error: {str(e)}", extra={"request_id": request_id})
+        raise HTTPException(status_code=400, detail=f"Invalid request format: {str(e)}")
+    
     session_id = payload.sessionId
     message_text = payload.message.text
     
