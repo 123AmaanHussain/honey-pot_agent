@@ -23,10 +23,13 @@ class ScammerType(str, Enum):
 
 class Message(BaseModel):
     """Message model for incoming messages."""
-    sender: str = Field(..., description="Message sender identifier")
+    sender: str = Field(default="scammer", description="Message sender identifier")
     text: str = Field(..., min_length=1, description="Message text content")
-    timestamp: str = Field(..., description="Message timestamp in ISO format")
+    timestamp: Optional[str] = Field(default=None, description="Message timestamp in ISO format")
     imageData: Optional[str] = Field(None, description="Base64 encoded image data for OCR/Vision")
+    
+    class Config:
+        extra = "ignore"  # Ignore extra fields from organizers
     
     @validator("text")
     def validate_text_not_empty(cls, v):
