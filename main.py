@@ -721,13 +721,18 @@ async def handle_message(
     else:
         # Generate intelligent reply with persona switching
         try:
+            # Extract imageData if present
+            image_data = None
+            if isinstance(body_json.get("message"), dict):
+                image_data = body_json["message"].get("imageData")
+            
             # Generate intelligent reply with persona switching and vision support
             reply, new_persona, scanned_intel = generate_reply(
                 confidence=session.confidence,
                 last_message=message_text,
                 current_persona=session.current_persona,
                 extracted_intelligence=session.extracted.dict(),
-                image_data=payload.message.imageData
+                image_data=image_data
             )
             
             # Merge scanned intelligence if any
