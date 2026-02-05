@@ -25,9 +25,17 @@ class Settings(BaseSettings):
     
     # LLM Configuration
     gemini_api_key: str = Field(..., description="Google Gemini API key")
+    
+    # Groq Configuration
+    groq_api_key: Optional[str] = Field(None, description="Groq API key")
+    groq_model: str = Field(
+        default="llama3-8b-8192",
+        description="Groq model to use (llama3-8b-8192)"
+    )
+    
     llm_model: str = Field(
         default="models/gemini-flash-latest",
-        description="Gemini model to use"
+        description="Gemini model to use (fallback/vision)"
     )
     llm_temperature: float = Field(
         default=0.4,

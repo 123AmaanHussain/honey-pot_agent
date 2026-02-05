@@ -16,11 +16,22 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # 🔑 STEP 1 — Set Up Gemini
+# 🔑 STEP 1 — Set Up Gemini and Groq
 settings = get_settings()
 genai.configure(api_key=settings.gemini_api_key)
 
-# Use model from settings
-model = genai.GenerativeModel(settings.llm_model)
+# Configure Gemini model (fallback/vision)
+gemini_model = genai.GenerativeModel(settings.llm_model)
+
+# Configure Groq client if key exists
+groq_client = None
+if settings.groq_api_key:
+    try:
+        from groq import Groq
+        groq_client = Groq(api_key=settings.groq_api_key)
+        logger.info("✅ Groq client initialized for high-speed inference")
+    except Exception as e:
+        logger.error(f"Failed to initialize Groq client: {e}")
 
 # Get persona manager
 persona_manager = get_persona_manager()
@@ -49,15 +60,35 @@ def detect_topic(message):
         return "BANK"
     return "GENERAL"
 
-# 🤖 STEP 4 — Call Gemini (With Auto-Retry)
+# 🤖 STEP 4 — Call LLM (Text-Only via Groq, or Gemini Fallback)
 def call_llm(prompt):
-    """Call LLM with retry mechanism and configured temperature."""
+    """
+    Call LLM with hybrid strategy:
+    1. Try Groq (Llama 3) first for speed
+    2. Fallback to Gemini if Groq fails or not configured
+    """
     settings = get_settings()
     
-    # Try up to 3 times for Rate Limits OR Connection drops
+    # STRATEGY 1: Groq (Fastest)
+    if groq_client and settings.groq_model:
+        try:
+            chat_completion = groq_client.chat.completions.create(
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                model=settings.groq_model,
+                temperature=settings.llm_temperature,
+                max_tokens=150,
+            )
+            return chat_completion.choices[0].message.content.strip()
+        except Exception as e:
+            logger.warning(f"Groq call failed, falling back to Gemini: {e}")
+            # Fall through to Gemini
+            
+    # STRATEGY 2: Gemini (Reliable Fallback)
     for attempt in range(3):
         try:
-            response = model.generate_content(
+            response = gemini_model.generate_content(
                 prompt,
                 generation_config=genai.types.GenerationConfig(
                     temperature=settings.llm_temperature
@@ -66,16 +97,14 @@ def call_llm(prompt):
             return response.text.strip()
 
         except (exceptions.ResourceExhausted, ConnectionError, Exception) as e:
-            # Check if it's a fatal error or a retry-able network error
             error_str = str(e).lower()
             if "quota" in error_str or "connection" in error_str or "remote" in error_str:
                 wait_time = 2 * (attempt + 1)
-                logger.warning(f"LLM call failed, retrying in {wait_time}s... (attempt {attempt + 1}/3)")
+                logger.warning(f"Gemini call failed, retrying in {wait_time}s... (attempt {attempt + 1}/3)")
                 time.sleep(wait_time)
-                continue # Try loop again
+                continue
 
-            # If it's a real code error (like syntax), print and return fallback
-            logger.error(f"LLM error: {e}", exc_info=True)
+            logger.error(f"Gemini error: {e}", exc_info=True)
             return "I'm having trouble understanding. Can you repeat that?"
 
     return "System busy, please try later."
