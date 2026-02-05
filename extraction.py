@@ -114,10 +114,30 @@ def extract_urls(text: str) -> List[str]:
     """
     matches = URL_PATTERN.findall(text)
     
-    if matches:
-        logger.info(f"Extracted {len(matches)} URLs")
+    # Filter out UPI IDs that might match URL pattern (e.g., scammer.fraud)
+    # A valid URL should have a proper TLD (com, org, in, etc.) and not contain @
+    common_tlds = ['com', 'org', 'net', 'in', 'io', 'co', 'gov', 'edu']
+    filtered_urls = []
+    for match in matches:
+        # Skip if it looks like a UPI ID (contains @ or is part of email-like pattern)
+        if '@' in match:
+            continue
+        # Check if it has a valid TLD
+        parts = match.split('.')
+        if len(parts) < 2:
+            continue
+        tld = parts[-1].lower().split('/')[0]  # Get TLD before any path
+        if tld not in common_tlds and len(tld) > 3:
+            continue
+        # Skip very short matches (likely false positives)
+        if len(match) < 8:
+            continue
+        filtered_urls.append(match)
     
-    return list(set(matches))  # Remove duplicates
+    if filtered_urls:
+        logger.info(f"Extracted {len(filtered_urls)} URLs")
+    
+    return list(set(filtered_urls))  # Remove duplicates
 
 
 def extract_bank_accounts(text: str) -> List[str]:
