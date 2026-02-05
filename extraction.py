@@ -16,8 +16,9 @@ UPI_PATTERN = re.compile(
 )
 
 # Enhanced phone pattern - captures +91-XXX, 91-XXX, and plain 10-digit
+# Added (?<!\d) to ensure we don't match the end of a longer number (like a bank account)
 PHONE_PATTERN = re.compile(
-    r'(?:\+91[\s\-]?|91[\s\-]?)?[6-9]\d{9}(?!\d)',  # Indian phone numbers with optional country code
+    r'(?<!\d)(?:\+91[\s\-]?|91[\s\-]?)?[6-9]\d{9}(?!\d)',  # Indian phone numbers with optional country code
     re.IGNORECASE
 )
 
