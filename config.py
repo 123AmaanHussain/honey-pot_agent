@@ -29,8 +29,8 @@ class Settings(BaseSettings):
     # Groq Configuration
     groq_api_key: Optional[str] = Field(None, description="Groq API key")
     groq_model: str = Field(
-        default="llama3-8b-8192",
-        description="Groq model to use (llama3-8b-8192)"
+        default="llama-3.1-8b-instant",
+        description="Groq model to use (llama-3.1-8b-instant)"
     )
     
     llm_model: str = Field(
