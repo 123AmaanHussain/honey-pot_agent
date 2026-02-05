@@ -10,21 +10,22 @@ logger = logging.getLogger(__name__)
 
 
 # Regex patterns for extraction
+# Fixed UPI pattern - removed trailing \b to allow dots in domain (e.g., @fakebank.com)
 UPI_PATTERN = re.compile(
-    r'\b[\w\.\-]+@[\w]+\b',  # Matches patterns like user@paytm, name@ybl
+    r'[\w\.\-]+@[\w\.\-]+',  # Matches user@paytm, scammer.fraud@fakebank, etc.
     re.IGNORECASE
 )
 
 # Enhanced phone pattern - captures +91-XXX, 91-XXX, and plain 10-digit
-# Added (?<!\d) to ensure we don't match the end of a longer number (like a bank account)
+# Relaxed lookbehind to allow + sign before 91
 PHONE_PATTERN = re.compile(
-    r'(?<!\d)(?:\+91[\s\-]?|91[\s\-]?)?[6-9]\d{9}(?!\d)',  # Indian phone numbers with optional country code
+    r'(?:(?<!\d)\+91[\s\-]?|(?<!\d)91[\s\-]?|(?<!\d))[6-9]\d{9}(?!\d)',  # Indian phone numbers
     re.IGNORECASE
 )
 
-# Enhanced URL pattern - captures both http:// and www. formats
+# Enhanced URL pattern - captures http://, www., and plain domains
 URL_PATTERN = re.compile(
-    r'(?:https?://)?(?:www\.)?[a-zA-Z0-9\-]+(?:\.[a-zA-Z0-9\-]+)+(?:\.[a-z]{2,})+(?:/[\w\-\./?%&=]*)?',
+    r'(?:https?://)?(?:www\.)?[a-zA-Z0-9\-]+(?:\.[a-zA-Z0-9\-]+)*\.[a-z]{2,}(?:/[\w\-\./?%&=]*)?',
     re.IGNORECASE
 )
 
