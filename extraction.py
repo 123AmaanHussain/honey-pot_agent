@@ -15,23 +15,29 @@ UPI_PATTERN = re.compile(
     re.IGNORECASE
 )
 
+# Enhanced phone pattern - captures +91-XXX, 91-XXX, and plain 10-digit
 PHONE_PATTERN = re.compile(
-    r'\b(?:\+91|91)?[\s\-]?[6-9]\d{9}\b'  # Indian phone numbers
-)
-
-URL_PATTERN = re.compile(
-    r'https?://(?:www\.)?[\w\-\.]+(?:\.[a-z]{2,})+(?:/[\w\-\./?%&=]*)?',
+    r'(?:\+91[\s\-]?|91[\s\-]?)?[6-9]\d{9}(?!\d)',  # Indian phone numbers with optional country code
     re.IGNORECASE
 )
 
+# Enhanced URL pattern - captures both http:// and www. formats
+URL_PATTERN = re.compile(
+    r'(?:https?://)?(?:www\.)?[a-zA-Z0-9\-]+(?:\.[a-zA-Z0-9\-]+)+(?:\.[a-z]{2,})+(?:/[\w\-\./?%&=]*)?',
+    re.IGNORECASE
+)
+
+# Enhanced bank account pattern - captures 11-18 digit numbers (avoiding phone numbers)
 BANK_ACCOUNT_PATTERN = re.compile(
-    r'\b\d{9,18}\b'  # Indian bank accounts are typically 9-18 digits
+    r'\b\d{11,18}\b'  # Indian bank accounts are typically 11-18 digits
 )
 
 # Common UPI providers for validation
+# Expanded UPI providers list
 UPI_PROVIDERS = [
     'paytm', 'phonepe', 'googlepay', 'ybl', 'oksbi', 'okhdfcbank', 
-    'okicici', 'okaxis', 'ibl', 'axl', 'upi'
+    'okicici', 'okaxis', 'ibl', 'axl', 'upi', 'fakebank', 'fraud',
+    'scam', 'bank', 'pay', 'wallet'
 ]
 
 
@@ -73,22 +79,25 @@ def extract_phone_numbers(text: str) -> List[str]:
     """
     matches = PHONE_PATTERN.findall(text)
     
-    # Normalize phone numbers (remove spaces, dashes)
+    # Normalize phone numbers (remove spaces, dashes, country codes)
     normalized = []
+    seen = set()
+    
     for match in matches:
-        # Remove spaces and dashes
-        clean = re.sub(r'[\s\-]', '', match)
-        # Remove country code if present
-        if clean.startswith('+91'):
-            clean = clean[3:]
-        elif clean.startswith('91') and len(clean) == 12:
-            clean = clean[2:]
+        # Remove spaces, dashes, and plus sign
+        clean = re.sub(r'[\s\-\+]', '', match)
         
-        if len(clean) == 10:
+        # Remove country code if present
+        if clean.startswith('91') and len(clean) >= 12:
+            clean = clean[2:]  # Remove '91' prefix
+        
+        # Ensure it's exactly 10 digits and starts with 6-9
+        if len(clean) == 10 and clean[0] in '6789' and clean not in seen:
             normalized.append(clean)
+            seen.add(clean)
             logger.info(f"Extracted phone number: {clean}")
     
-    return list(set(normalized))  # Remove duplicates
+    return normalized
 
 
 def extract_urls(text: str) -> List[str]:
