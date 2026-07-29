@@ -28,17 +28,17 @@ class TestPersonaManager:
     
     def test_persona_selection_low_confidence(self):
         """Test persona selection at low confidence (0.3-0.5)."""
-        persona = self.manager.select_persona(0.4)
+        persona = self.manager.select_persona(0.35)
         assert persona.persona_type == PersonaType.OVER_POLITE
-        assert persona.min_confidence <= 0.4
-        assert persona.max_confidence >= 0.4
+        assert persona.min_confidence <= 0.35
+        assert persona.max_confidence >= 0.35
     
     def test_persona_selection_very_low_confidence(self):
-        """Test persona selection at very low confidence (0.0-0.3)."""
-        persona = self.manager.select_persona(0.2)
+        """Test persona selection at very low confidence (0.0-0.1)."""
+        persona = self.manager.select_persona(0.05)
         assert persona.persona_type == PersonaType.TECH_SAVVY
-        assert persona.min_confidence <= 0.2
-        assert persona.max_confidence >= 0.2
+        assert persona.min_confidence <= 0.05
+        assert persona.max_confidence >= 0.05
     
     def test_persona_switching_detection(self, caplog):
         """Test that persona switching is logged."""

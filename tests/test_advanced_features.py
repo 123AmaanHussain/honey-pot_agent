@@ -24,11 +24,11 @@ class TestAdvancedFeatures:
         p2 = manager.select_persona(0.45)
         assert p2.persona_type == PersonaType.CURIOUS_STUDENT
         
-        # Test Paranoid User (0.2)
-        p3 = manager.select_persona(0.2)
+        # Test Paranoid User (0.15 — clearly in PARANOID_USER band 0.1–0.25)
+        p3 = manager.select_persona(0.15)
         assert p3.persona_type == PersonaType.PARANOID_USER
 
-    @patch('agent.call_llm')
+    @patch('app.core.agent.call_llm')
     def test_scammer_profiling(self, mock_llm):
         """Test scammer profiling logic and parsing."""
         mock_llm.return_value = "TYPE: BANKING\nPROFILE: Scammer is impersonating a bank official using a fake KYC warning."
@@ -57,7 +57,7 @@ class TestAdvancedFeatures:
         # For simplicity, we assume the thread starts and calls post
         # mock_post.assert_called() - might fail due to threading
 
-    @patch('agent.model.generate_content')
+    @patch('app.core.agent.gemini_model.generate_content')
     def test_vision_processing(self, mock_vision):
         """Test vision-based intelligence extraction."""
         mock_response = MagicMock()
@@ -68,8 +68,8 @@ class TestAdvancedFeatures:
         assert "9876543210@paytm" in extracted
         assert "123456789012" in extracted
 
-    @patch('agent.process_image_for_intel')
-    @patch('agent.call_llm')
+    @patch('app.core.agent.process_image_for_intel')
+    @patch('app.core.agent.call_llm')
     def test_multimodal_reply(self, mock_llm, mock_vision):
         """Test that reply generation integrates vision intelligence."""
         mock_vision.return_value = ["extracted_upi@ok"]

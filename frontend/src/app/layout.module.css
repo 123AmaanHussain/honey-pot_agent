@@ -1,0 +1,69 @@
+.layoutContainer {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--bg-panel);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--border-light);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin-bottom: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoAccent {
+  color: var(--accent-safe);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.navItem {
+  padding: 0.875rem 1.25rem;
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.navItem.active {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--text-accent);
+  border-left: 3px solid var(--text-accent);
+}
+
+.mainContent {
+  flex: 1;
+  margin-left: 280px;
+  padding: 2rem 3rem;
+  width: calc(100% - 280px);
+}

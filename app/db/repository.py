@@ -1,0 +1,244 @@
+"""
+Database CRUD repository for sessions, intelligence, and messages.
+All functions degrade gracefully (return False/empty) when DB is not connected,
+allowing the app to run in memory-only mode without any changes.
+"""
+import json
+import logging
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Any
+
+from .client import get_db, is_connected
+
+try:
+    from psycopg2.extras import RealDictCursor
+    PSYCOPG2_AVAILABLE = True
+except ImportError:
+    PSYCOPG2_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
+
+
+# ─────────────────────────────────────────────
+# Session CRUD
+# ─────────────────────────────────────────────
+
+def upsert_session(session_id: str, session_data: dict) -> bool:
+    """
+    Insert or update a session in the database.
+    Uses ON CONFLICT DO UPDATE (upsert) pattern.
+
+    Args:
+        session_id: Unique session identifier
+        session_data: Dict matching SessionData fields
+
+    Returns:
+        True on success, False if DB unavailable or error
+    """
+    if not is_connected():
+        return False
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO sessions (
+                        id, confidence, turns, completed,
+                        scammer_type, scammer_profile,
+                        current_persona, persona_history,
+                        behavior_patterns, last_activity
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        confidence        = EXCLUDED.confidence,
+                        turns             = EXCLUDED.turns,
+                        completed         = EXCLUDED.completed,
+                        scammer_type      = EXCLUDED.scammer_type,
+                        scammer_profile   = EXCLUDED.scammer_profile,
+                        current_persona   = EXCLUDED.current_persona,
+                        persona_history   = EXCLUDED.persona_history,
+                        behavior_patterns = EXCLUDED.behavior_patterns,
+                        last_activity     = EXCLUDED.last_activity
+                    """,
+                    (
+                        session_id,
+                        session_data.get("confidence", 1.0),
+                        session_data.get("turns", 0),
+                        session_data.get("completed", False),
+                        session_data.get("scammer_type", "unknown"),
+                        session_data.get("scammer_profile"),
+                        session_data.get("current_persona"),
+                        json.dumps(session_data.get("persona_history", [])),
+                        json.dumps(session_data.get("behavior_patterns", {})),
+                        datetime.now(timezone.utc),
+                    ),
+                )
+        return True
+    except Exception as e:
+        logger.error(f"upsert_session failed for {session_id}: {e}")
+        return False
+
+
+def get_session(session_id: str) -> Optional[Dict]:
+    """
+    Load a session + its intelligence from Neon.
+
+    Returns:
+        Dict with session + intel fields, or None if not found / DB unavailable
+    """
+    if not is_connected():
+        return None
+
+    try:
+        with get_db() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(
+                    """
+                    SELECT
+                        s.*,
+                        i.upi_ids, i.phone_numbers, i.phishing_links,
+                        i.bank_accounts, i.suspicious_keywords, i.scanned_text
+                    FROM sessions s
+                    LEFT JOIN intelligence i ON s.id = i.session_id
+                    WHERE s.id = %s
+                    """,
+                    (session_id,),
+                )
+                row = cur.fetchone()
+                return dict(row) if row else None
+    except Exception as e:
+        logger.error(f"get_session failed for {session_id}: {e}")
+        return None
+
+
+def get_all_sessions() -> List[Dict]:
+    """
+    Return all sessions with their intelligence data.
+    Used by the /intelligence endpoint.
+    """
+    if not is_connected():
+        return []
+
+    try:
+        with get_db() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(
+                    """
+                    SELECT
+                        s.*,
+                        i.upi_ids, i.phone_numbers, i.phishing_links,
+                        i.bank_accounts, i.suspicious_keywords, i.scanned_text
+                    FROM sessions s
+                    LEFT JOIN intelligence i ON s.id = i.session_id
+                    ORDER BY s.created_at DESC
+                    """
+                )
+                return [dict(row) for row in cur.fetchall()]
+    except Exception as e:
+        logger.error(f"get_all_sessions failed: {e}")
+        return []
+
+
+# ─────────────────────────────────────────────
+# Intelligence CRUD
+# ─────────────────────────────────────────────
+
+def upsert_intelligence(session_id: str, intel: dict) -> bool:
+    """
+    Insert or update extracted intelligence for a session.
+    Arrays are stored as PostgreSQL native TEXT[] arrays.
+
+    Args:
+        session_id: Session to link intel to
+        intel: Dict with keys: upiIds, phoneNumbers, phishingLinks,
+               bankAccounts, suspiciousKeywords, scannedText
+    """
+    if not is_connected():
+        return False
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO intelligence (
+                        session_id, upi_ids, phone_numbers,
+                        phishing_links, bank_accounts,
+                        suspicious_keywords, scanned_text, updated_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (session_id) DO UPDATE SET
+                        upi_ids             = EXCLUDED.upi_ids,
+                        phone_numbers       = EXCLUDED.phone_numbers,
+                        phishing_links      = EXCLUDED.phishing_links,
+                        bank_accounts       = EXCLUDED.bank_accounts,
+                        suspicious_keywords = EXCLUDED.suspicious_keywords,
+                        scanned_text        = EXCLUDED.scanned_text,
+                        updated_at          = EXCLUDED.updated_at
+                    """,
+                    (
+                        session_id,
+                        intel.get("upiIds", []),
+                        intel.get("phoneNumbers", []),
+                        intel.get("phishingLinks", []),
+                        intel.get("bankAccounts", []),
+                        intel.get("suspiciousKeywords", []),
+                        intel.get("scannedText", []),
+                        datetime.now(timezone.utc),
+                    ),
+                )
+        return True
+    except Exception as e:
+        logger.error(f"upsert_intelligence failed for {session_id}: {e}")
+        return False
+
+
+# ─────────────────────────────────────────────
+# Messages CRUD
+# ─────────────────────────────────────────────
+
+def save_message(session_id: str, sender: str, text: str) -> bool:
+    """
+    Persist a single message to the messages table.
+
+    Args:
+        session_id: Owning session ID
+        sender: Who sent this message (scammer / agent / user)
+        text: Message content
+    """
+    if not is_connected():
+        return False
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO messages (session_id, sender, text) VALUES (%s, %s, %s)",
+                    (session_id, sender, text),
+                )
+        return True
+    except Exception as e:
+        logger.error(f"save_message failed for {session_id}: {e}")
+        return False
+
+
+def get_messages(session_id: str) -> List[Dict]:
+    """Return all messages for a session, ordered chronologically."""
+    if not is_connected():
+        return []
+
+    try:
+        with get_db() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(
+                    """
+                    SELECT sender, text, created_at
+                    FROM messages
+                    WHERE session_id = %s
+                    ORDER BY created_at ASC
+                    """,
+                    (session_id,),
+                )
+                return [dict(row) for row in cur.fetchall()]
+    except Exception as e:
+        logger.error(f"get_messages failed for {session_id}: {e}")
+        return []

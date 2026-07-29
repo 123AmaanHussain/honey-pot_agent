@@ -16,30 +16,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from logging.handlers import RotatingFileHandler
 
-from config import get_settings, Settings
-from models import (
+from app.config import get_settings, Settings
+from app.models import (
     IncomingRequest, MessageResponse, ErrorResponse,
     HealthResponse, DetailedHealthResponse, MetricsResponse,
     SessionResponse, SessionData, ExtractedIntelligence,
     IntelligenceResponse, ScammerType
 )
-from middleware import (
+from app.middleware import (
     RequestIDMiddleware, RequestLoggingMiddleware,
     SecurityHeadersMiddleware, RateLimitMiddleware
 )
-from detection import detect_scam, update_confidence
-from agent import generate_reply, generate_exit_message, profile_scammer
-from callback import send_final_callback
-from extraction import extract_all_intelligence, merge_intelligence
-from webhook_manager import EventManager
-
-# Neon PostgreSQL persistence (gracefully degrades when not configured)
-try:
-    from app.db.client import init_db, is_connected
-    from app.db import repository as db_repo
-    DB_AVAILABLE = True
-except Exception:
-    DB_AVAILABLE = False
+from app.core.detection import detect_scam, update_confidence
+from app.core.agent import generate_reply, generate_exit_message, profile_scammer
+from app.callback import send_final_callback
+from app.core.extraction import extract_all_intelligence, merge_intelligence
+from app.webhook_manager import EventManager
+from app.db import client as db_client
+from app.db import repository as db_repo
 
 
 # -------------------------
@@ -60,18 +54,9 @@ def setup_logging(settings: Settings):
     # Remove existing handlers
     root_logger.handlers.clear()
     
-    # Console handler (force UTF-8 on Windows to avoid cp1252 emoji errors)
+    # Console handler
     console_handler = logging.StreamHandler()
     console_handler.setLevel(settings.log_level)
-    # Reconfigure stdout encoding if needed (Windows cp1252 fix)
-    try:
-        import sys
-        if hasattr(sys.stdout, "reconfigure"):
-            sys.stdout.reconfigure(encoding="utf-8")
-        if hasattr(sys.stderr, "reconfigure"):
-            sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
     console_formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
@@ -108,24 +93,6 @@ app_start_time = time.time()
 SESSIONS: Dict[str, SessionData] = {}
 
 
-def _persist_to_db(session_id: str, session: SessionData, save_message: tuple[str, str] = None):
-    """
-    Persist session state, intelligence, and optional message to Neon PostgreSQL.
-    Gracefully degrades when DB is unavailable.
-    """
-    if not DB_AVAILABLE or not is_connected():
-        return
-    try:
-        db_repo.upsert_session(session_id, session.dict())
-        db_repo.upsert_intelligence(session_id, session.extracted.dict())
-        if save_message:
-            sender, text = save_message
-            db_repo.save_message(session_id, sender, text)
-    except Exception as e:
-        logger = logging.getLogger(__name__)
-        logger.warning(f"DB persistence failed for {session_id}: {e}")
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup and shutdown events."""
@@ -133,29 +100,59 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     setup_logging(settings)
     logger = logging.getLogger(__name__)
-    
+
     logger.info("=" * 60)
     logger.info(f"Starting {settings.api_title} v{settings.api_version}")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"Debug mode: {settings.debug}")
-    
-    # Initialize Neon PostgreSQL if configured
-    if DB_AVAILABLE and settings.db_enabled and settings.database_url:
-        db_ok = init_db(settings.database_url)
-        if db_ok:
-            logger.info("[OK] Neon PostgreSQL persistence enabled")
-        else:
-            logger.warning("[WARN] Neon PostgreSQL init failed — running in memory-only mode")
-    else:
-        logger.info("[INFO] Database persistence disabled (set db_enabled=True and DATABASE_URL to enable)")
-    
     logger.info("=" * 60)
-    
+
+    # ── Neon DB Init ─────────────────────────────────────────
+    if settings.db_enabled and settings.database_url:
+        connected = db_client.init_db(settings.database_url)
+        if connected:
+            logger.info("[OK] Neon PostgreSQL connected and pool initialized")
+            
+            # Hydrate in-memory SESSIONS from DB
+            try:
+                db_sessions = db_repo.get_all_sessions()
+                for row in db_sessions:
+                    sid = row.pop("id")
+                    
+                    # Group intelligence fields
+                    intel_data = {
+                        "upiIds": row.pop("upi_ids", []) or [],
+                        "phoneNumbers": row.pop("phone_numbers", []) or [],
+                        "phishingLinks": row.pop("phishing_links", []) or [],
+                        "bankAccounts": row.pop("bank_accounts", []) or [],
+                        "suspiciousKeywords": row.pop("suspicious_keywords", []) or [],
+                        "scannedText": row.pop("scanned_text", []) or []
+                    }
+                    
+                    # Parse JSON fields if they are strings (psycopg2 RealDictCursor might return strings or dicts)
+                    if isinstance(row.get("persona_history"), str):
+                        row["persona_history"] = json.loads(row["persona_history"])
+                    if isinstance(row.get("behavior_patterns"), str):
+                        row["behavior_patterns"] = json.loads(row["behavior_patterns"])
+                        
+                    row["extracted"] = ExtractedIntelligence(**intel_data)
+                    SESSIONS[sid] = SessionData(**row)
+                
+                logger.info(f"Loaded {len(SESSIONS)} existing sessions from database")
+            except Exception as e:
+                logger.error(f"Failed to hydrate sessions from DB: {e}")
+                
+        else:
+            logger.warning("[FAIL] Neon PostgreSQL connection failed, running in-memory only.")
+    else:
+        logger.info("DB_ENABLED=false — running in memory-only mode (set DATABASE_URL + DB_ENABLED=true to persist)")
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down application")
     logger.info(f"Total sessions processed: {len(SESSIONS)}")
+    db_client.close_db()
 
 
 # -------------------------
@@ -305,6 +302,7 @@ async def detailed_health_check():
         "api": "healthy",
         "sessions": "healthy",
         "logging": "healthy",
+        "database": "connected" if db_client.is_connected() else "memory-only",
     }
     
     # Basic metrics
@@ -481,7 +479,8 @@ async def debug_message(request: Request, api_key: str = Depends(verify_api_key)
     """Debug endpoint to see exactly what organizers are sending."""
     try:
         body = await request.json()
-        logger.info(f"DEBUG - Received body: {json.dumps(body, indent=2)}")
+        logger.info(f"[INFO] Received JSON keys: {list(body.keys())}")
+        logger.info(f"[INFO] Received body: {json.dumps(body, indent=2)}")
         return {
             "status": "debug_success",
             "received": body,
@@ -597,9 +596,6 @@ async def handle_message(
     session = SESSIONS[session_id]
     session.update_activity()
     
-    # Persist session + incoming message to Neon
-    _persist_to_db(session_id, session, save_message=("scammer", message_text))
-    
     # Add message to history for pattern detection (keep last 10)
     session.message_history.append(message_text)
     if len(session.message_history) > 10:
@@ -616,8 +612,11 @@ async def handle_message(
     
     # -------------------------
     # PASS-THROUGH MODE: If NOT scam, let user handle it
+    # We only pass through if it's the first message AND it's not a scam.
+    # If the agent is already engaged (turns > 0), we must keep engaging!
     # -------------------------
-    if not detection["is_scam"]:
+    is_already_engaged = session.turns > 0
+    if not detection["is_scam"] and not is_already_engaged:
         logger.info(
             f"No scam detected - passing through to user",
             extra={
@@ -687,9 +686,6 @@ async def handle_message(
     
     session.turns += 1
     
-    # Persist updated session + intelligence to Neon
-    _persist_to_db(session_id, session)
-    
     # -------------------------
     # Scammer Profiling (Experimental)
     # -------------------------
@@ -716,25 +712,19 @@ async def handle_message(
     # -------------------------
     def should_exit() -> tuple[bool, str]:
         """Determine if agent should exit conversation."""
-        # Exit condition 1: Confidence threshold reached
+        # Exit condition 1: Confidence threshold reached (False positive / Safe user)
         if session.confidence <= settings.exit_confidence_threshold:
             return True, "confidence_threshold"
         
-        # Exit condition 2: Sufficient intelligence collected
-        has_critical_intel = (
-            len(session.extracted.upiIds) > 0 or
-            len(session.extracted.phoneNumbers) > 0 or
-            len(session.extracted.phishingLinks) > 0 or
-            len(session.extracted.bankAccounts) > 0 or
-            len(session.extracted.scannedText) > 0
-        )
-        if has_critical_intel and session.turns >= 3:
-            return True, "intelligence_collected"
-        
-        # Exit condition 3: Too many turns (safety limit)
-        if session.turns >= 15:
+        # Exit condition 2: Escalation detected (Agent performs safe exit to avoid harassment)
+        if detection.get("escalation", {}).get("is_escalating", False):
+            return True, "escalation_detected"
+            
+        # Hard safety limit to prevent absolute infinite loops with other bots
+        if session.turns >= 50:
             return True, "max_turns_reached"
         
+        # Otherwise, stay engaged indefinitely to extract max intelligence
         return False, None
     
     exit_needed, exit_reason = should_exit()
@@ -765,9 +755,6 @@ async def handle_message(
         
         session.completed = True
         
-        # Persist completed session to Neon
-        _persist_to_db(session_id, session)
-        
         # Generate persona-appropriate exit message
         reply = generate_exit_message(
             current_persona=session.current_persona,
@@ -787,7 +774,8 @@ async def handle_message(
                 last_message=message_text,
                 current_persona=session.current_persona,
                 extracted_intelligence=session.extracted.dict(),
-                image_data=image_data
+                image_data=image_data,
+                message_history=session.message_history
             )
             
             # Merge scanned intelligence if any
@@ -814,10 +802,6 @@ async def handle_message(
             )
             reply = "I'm not sure I understand. Can you explain more?"
     
-    # Persist agent reply to Neon
-    if reply:
-        _persist_to_db(session_id, session, save_message=("agent", reply))
-    
     logger.info(
         f"Message processed successfully - agent engaged",
         extra={
@@ -829,6 +813,14 @@ async def handle_message(
         }
     )
     
+    # ── Write-Through DB Persistence ───────────────────────────
+    # Persist session state and intelligence to Neon (no-op if DB not connected)
+    db_repo.upsert_session(session_id, session.dict())
+    db_repo.upsert_intelligence(session_id, session.extracted.dict())
+    db_repo.save_message(session_id, "scammer", message_text)
+    if reply:
+        db_repo.save_message(session_id, "agent", reply)
+
     # Return full response (includes organizer-compatible status + reply AND test-compatible fields)
     return MessageResponse(
         status="success",
@@ -844,24 +836,6 @@ async def handle_message(
 # -------------------------
 # Admin Endpoints (Optional)
 # -------------------------
-
-@app.get("/sessions/{session_id}", response_model=SessionResponse, tags=["Admin"])
-async def get_session(
-    session_id: str,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Get session details by ID.
-    Requires valid API key.
-    """
-    if session_id not in SESSIONS:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    return SessionResponse(
-        session_id=session_id,
-        data=SESSIONS[session_id]
-    )
-
 
 @app.get("/sessions", tags=["Admin"])
 async def list_sessions(
@@ -891,73 +865,60 @@ async def get_completed_sessions(
     since: str = ""
 ):
     """
-    Return completed sessions with full intelligence.
-    Used by the local agent to poll for newly completed scam sessions
-    and notify the user.
-    
-    Query param `since` is an ISO timestamp; only sessions completed
-    after that time are returned.
+    Retrieve a list of completed scam sessions.
+    Optionally filter by 'since' timestamp to get only recently completed sessions.
     """
-    completed = []
-    for sid, data in SESSIONS.items():
-        if not data.completed:
-            continue
-        if since and data.last_activity and data.last_activity.isoformat() < since:
-            continue
-        completed.append({
-            "session_id": sid,
-            "platform": getattr(data, "platform", "unknown"),
-            "scammer_type": data.scammer_type.value,
-            "scammer_profile": data.scammer_profile,
-            "confidence": data.confidence,
-            "turns": data.turns,
-            "completed_at": data.last_activity.isoformat() if data.last_activity else None,
-            "intelligence": data.extracted.dict(),
-            "current_persona": data.current_persona,
-        })
+    from datetime import datetime
+    completed_sessions = []
+    for session_id, session in SESSIONS.items():
+        if session.completed:
+            if since:
+                since_dt = datetime.fromisoformat(since)
+                # Handle timezone mismatch: make both naive for comparison
+                if session.last_activity:
+                    last_act = session.last_activity
+                    if last_act.tzinfo is not None and since_dt.tzinfo is None:
+                        last_act = last_act.replace(tzinfo=None)
+                    elif last_act.tzinfo is None and since_dt.tzinfo is not None:
+                        since_dt = since_dt.replace(tzinfo=None)
+                    if last_act < since_dt:
+                        continue
+            # Add session_id to the session data for the response
+            session_dict = session.dict()
+            session_dict["session_id"] = session_id
+            completed_sessions.append(session_dict)
+    return completed_sessions
+
+
+@app.get("/sessions/{session_id}", response_model=SessionResponse, tags=["Admin"])
+async def get_session(
+    session_id: str,
+    api_key: str = Depends(verify_api_key)
+):
+    """
+    Get session details by ID.
+    Requires valid API key.
+    """
+    if session_id not in SESSIONS:
+        raise HTTPException(status_code=404, detail="Session not found")
     
-    # Also pull from DB if available (covers sessions from previous restarts)
-    if DB_AVAILABLE and is_connected():
-        try:
-            db_sessions = db_repo.get_all_sessions()
-            existing_ids = {s["session_id"] for s in completed}
-            for row in db_sessions:
-                if row.get("id") in existing_ids:
-                    continue
-                if not row.get("completed"):
-                    continue
-                if since and row.get("last_activity") and row["last_activity"].isoformat() < since:
-                    continue
-                completed.append({
-                    "session_id": row.get("id"),
-                    "platform": row.get("platform", "unknown"),
-                    "scammer_type": row.get("scammer_type", "unknown"),
-                    "scammer_profile": row.get("scammer_profile"),
-                    "confidence": row.get("confidence"),
-                    "turns": row.get("turns"),
-                    "completed_at": row.get("last_activity").isoformat() if row.get("last_activity") else None,
-                    "intelligence": {
-                        "upiIds": row.get("upi_ids", []) or [],
-                        "phoneNumbers": row.get("phone_numbers", []) or [],
-                        "phishingLinks": row.get("phishing_links", []) or [],
-                        "bankAccounts": row.get("bank_accounts", []) or [],
-                        "suspiciousKeywords": row.get("suspicious_keywords", []) or [],
-                        "scannedText": row.get("scanned_text", []) or [],
-                    },
-                    "current_persona": row.get("current_persona"),
-                })
-        except Exception as e:
-            logger.warning(f"DB query for completed sessions failed: {e}")
-    
-    return {
-        "total": len(completed),
-        "sessions": completed
-    }
+    messages = []
+    if get_settings().db_enabled:
+        messages = db_repo.get_messages(session_id)
+        
+    return SessionResponse(
+        session_id=session_id,
+        data=SESSIONS[session_id],
+        messages=messages
+    )
 
 
 # -------------------------
 # WhatsApp Monitor Control Endpoints
 # -------------------------
+
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from whatsapp_manager import start_monitor, stop_monitor, get_status, get_recent_output
 

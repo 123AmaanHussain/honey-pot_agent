@@ -40,6 +40,7 @@ dist/
 # OS files
 .DS_Store
 Thumbs.db
+nul
 
 # Temporary files
 *.tmp
@@ -60,3 +61,41 @@ brain/
 # Test outputs
 test_results/
 coverage_reports/
+
+# Architecture and documentation files (keep in docs/ folder)
+architecture*.html
+
+# Root-level shim files (re-exports from app/)
+agent.py
+callback.py
+config.py
+detection.py
+extraction.py
+middleware.py
+models.py
+persona_manager.py
+webhook_manager.py
+
+# Test scripts
+test_organizer_format.py
+test_api.bat
+test_api.sh
+
+# Frontend specific
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+frontend/.turbo/
+
+# Local agent specific
+local_agent/.wwebjs_auth/
+local_agent/.wwebjs_cache/
+local_agent/node_modules/
+local_agent/*.session
+local_agent/__pycache__/
+
+# Dashboard specific
+dashboard/.next/
+dashboard/node_modules/
+dashboard/out/
+dashboard/.turbo/
