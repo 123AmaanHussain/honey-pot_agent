@@ -6,6 +6,7 @@ import os
 import logging
 import time
 import json
+import asyncio
 from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import Dict
@@ -147,11 +148,50 @@ async def lifespan(app: FastAPI):
     else:
         logger.info("DB_ENABLED=false — running in memory-only mode (set DATABASE_URL + DB_ENABLED=true to persist)")
 
+    # ── Start Session Cleanup Task ─────────────────────────────
+    async def cleanup_expired_sessions():
+        """Background task to auto-complete expired sessions."""
+        while True:
+            try:
+                timeout_minutes = settings.session_timeout_minutes
+                expired_count = 0
+                
+                for session_id, session in list(SESSIONS.items()):
+                    if not session.completed and session.is_expired(timeout_minutes):
+                        session.completed = True
+                        session.update_activity()
+                        expired_count += 1
+                        logger.info(f"Auto-completed expired session: {session_id}")
+                        
+                        # Persist to DB
+                        db_repo.upsert_session(session_id, session.dict())
+                        db_repo.upsert_intelligence(session_id, session.extracted.dict())
+                
+                if expired_count > 0:
+                    logger.info(f"Auto-completed {expired_count} expired sessions")
+                    
+            except Exception as e:
+                logger.error(f"Error in session cleanup: {e}")
+            
+            # Wait for next cleanup interval
+            await asyncio.sleep(settings.session_cleanup_interval_minutes * 60)
+    
+    # Start the cleanup task
+    cleanup_task = asyncio.create_task(cleanup_expired_sessions())
+    
     yield
-
+    
     # Shutdown
     logger.info("Shutting down application")
     logger.info(f"Total sessions processed: {len(SESSIONS)}")
+    
+    # Cancel cleanup task
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
+    
     db_client.close_db()
 
 

@@ -174,7 +174,7 @@ export default function MonitorPage() {
             Open WhatsApp → Linked Devices → Link a Device
           </p>
           <div style={{
-            background: 'white',
+            background: 'blue',
             padding: '1rem',
             borderRadius: '8px',
             display: 'inline-block'
