@@ -49,14 +49,6 @@ Automatically categorizes scammers into types:
 - Job Offer Scams
 - Investment Scams
 
-### 👁️ **Multimodal Vision Analysis**
-Process images for scam intelligence using Gemini Vision:
-- OCR for screenshots and documents
-- QR code content extraction
-- Fake logo detection
-- Bank account number extraction
-- UPI ID extraction from images
-
 ### 🛡️ **Pass-Through Mode**
 - Monitors all messages silently
 - Only engages when scam is detected
