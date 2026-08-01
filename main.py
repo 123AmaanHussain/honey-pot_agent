@@ -782,13 +782,21 @@ async def handle_message(
                 image_data = body_json["message"].get("imageData")
             
             # Generate intelligent reply with persona switching and vision support
-            reply, new_persona, scanned_intel = generate_reply(
+            reply, new_persona, scanned_intel, should_exit = generate_reply(
                 confidence=session.confidence,
                 last_message=message_text,
                 current_persona=session.current_persona,
                 extracted_intelligence=session.extracted.dict(),
                 image_data=image_data
             )
+            
+            # If pressure detected or exit mode triggered, mark session for completion
+            if should_exit:
+                session.completed = True
+                logger.warning(
+                    f"Session marked for exit due to pressure or exit mode",
+                    extra={"session_id": session_id, "should_exit": should_exit}
+                )
             
             # Merge scanned intelligence if any
             if scanned_intel:

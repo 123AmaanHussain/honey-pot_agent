@@ -75,7 +75,7 @@ class TestAdvancedFeatures:
         mock_vision.return_value = ["extracted_upi@ok"]
         mock_llm.return_value = "I see your ID. Why do I need to pay?"
         
-        reply, persona, scanned = generate_reply(
+        reply, persona, scanned, should_exit = generate_reply(
             confidence=0.9,
             last_message="See this qr",
             image_data="base64_qr"
@@ -83,6 +83,7 @@ class TestAdvancedFeatures:
         
         assert "extracted_upi@ok" in scanned
         assert persona == PersonaType.CONFUSED_USER
+        assert should_exit == False  # No pressure detected
         # Check if vision intel was passed to LLM prompt (implicitly via mock_llm call check if needed)
 
 

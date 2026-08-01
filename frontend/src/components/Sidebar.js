@@ -8,13 +8,13 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const links = [
-    { href: '/', label: 'Overview', icon: '📊' },
-    { href: '/monitor', label: 'WhatsApp Monitor', icon: '📱' },
-    { href: '/telegram', label: 'Telegram Monitor', icon: '✈️' },
-    { href: '/email', label: 'Email Monitor', icon: '📧' },
-    { href: '/intelligence', label: 'Intelligence Hub', icon: '🧠' },
-    { href: '/sessions', label: 'Session Logs', icon: '💬' },
-    { href: '/simulator', label: 'Live Simulator', icon: '🎮' },
+    { href: '/', label: 'Command Center', icon: '�️' },
+    { href: '/monitor', label: 'WhatsApp Trap', icon: '📱' },
+    { href: '/telegram', label: 'Telegram Trap', icon: '✈️' },
+    { href: '/email', label: 'Email Trap', icon: '📧' },
+    { href: '/intelligence', label: 'Intel Hub', icon: '🧠' },
+    { href: '/sessions', label: 'Session Logs', icon: '�' },
+    { href: '/simulator', label: 'Simulator', icon: '🎮' },
   ];
 
   return (

@@ -1,28 +1,30 @@
 :root {
-  /* Professional Enterprise Color Scheme */
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #21262d;
-  --bg-hover: #30363d;
+  /* Cybercrime/Honeypot Theme */
+  --bg-primary: #0a0e14;
+  --bg-secondary: #0f141a;
+  --bg-tertiary: #1a1f2a;
+  --bg-hover: #252b38;
   
-  --border-primary: #30363d;
-  --border-secondary: #21262d;
-  --border-accent: #58a6ff;
+  --border-primary: #2d3542;
+  --border-secondary: #1a1f2a;
+  --border-accent: #00ff88;
   
-  --text-primary: #f0f6fc;
+  --text-primary: #e0e6ed;
   --text-secondary: #8b949e;
   --text-tertiary: #6e7681;
-  --text-accent: #58a6ff;
+  --text-accent: #00ff88;
   
-  --color-blue: #58a6ff;
-  --color-green: #3fb950;
-  --color-red: #f85149;
-  --color-yellow: #d29922;
-  --color-purple: #a371f7;
+  --color-blue: #00d4ff;
+  --color-green: #00ff88;
+  --color-red: #ff4757;
+  --color-yellow: #ffa502;
+  --color-purple: #a55eea;
+  --color-cyan: #00ffcc;
   
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 255, 136, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 255, 136, 0.15);
+  --shadow-lg: 0 10px 15px rgba(0, 255, 136, 0.2);
+  --shadow-glow: 0 0 20px rgba(0, 255, 136, 0.3);
   
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -67,11 +69,45 @@ a:hover {
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-green), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-base);
 }
 
 .panel:hover {
-  border-color: var(--border-accent);
+  border-color: var(--color-green);
+  box-shadow: var(--shadow-glow);
+}
+
+.panel:hover::before {
+  opacity: 1;
+}
+
+/* Cyber Glass Panel */
+.glass-panel {
+  background: rgba(15, 20, 26, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: all var(--transition-base);
+}
+
+.glass-panel:hover {
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
 }
 
 /* Button Styles */
@@ -87,33 +123,71 @@ a:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+  transition: left var(--transition-slow);
+}
+
+.btn:hover::before {
+  left: 100%;
 }
 
 .btn:hover {
   background: var(--bg-hover);
-  border-color: var(--text-secondary);
+  border-color: var(--color-green);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
 }
 
 .btn-primary {
-  background: var(--color-blue);
-  border-color: var(--color-blue);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-green), var(--color-cyan));
+  border-color: var(--color-green);
+  color: #0a0e14;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }
 
 .btn-primary:hover {
-  background: #4094ff;
-  border-color: #4094ff;
+  background: linear-gradient(135deg, var(--color-cyan), var(--color-green));
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
 }
 
 .btn-danger {
-  background: rgba(248, 81, 73, 0.1);
+  background: rgba(255, 71, 87, 0.1);
   border-color: var(--color-red);
   color: var(--color-red);
 }
 
 .btn-danger:hover {
-  background: rgba(248, 81, 73, 0.2);
+  background: rgba(255, 71, 87, 0.2);
+  border-color: var(--color-red);
+  box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
+}
+
+.btn-cyber {
+  background: transparent;
+  border: 1px solid var(--color-green);
+  color: var(--color-green);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
+}
+
+.btn-cyber:hover {
+  background: rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+  text-shadow: 0 0 10px var(--color-green);
 }
 
 .btn-sm {
@@ -130,24 +204,29 @@ a:hover {
   font-weight: 500;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .badge-success {
-  background: rgba(63, 185, 80, 0.15);
+  background: rgba(0, 255, 136, 0.15);
   color: var(--color-green);
-  border-color: rgba(63, 185, 80, 0.3);
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
 }
 
 .badge-danger {
-  background: rgba(248, 81, 73, 0.15);
+  background: rgba(255, 71, 87, 0.15);
   color: var(--color-red);
-  border-color: rgba(248, 81, 73, 0.3);
+  border-color: rgba(255, 71, 87, 0.3);
+  box-shadow: 0 0 10px rgba(255, 71, 87, 0.2);
 }
 
 .badge-warning {
-  background: rgba(210, 153, 34, 0.15);
+  background: rgba(255, 165, 2, 0.15);
   color: var(--color-yellow);
-  border-color: rgba(210, 153, 34, 0.3);
+  border-color: rgba(255, 165, 2, 0.3);
+  box-shadow: 0 0 10px rgba(255, 165, 2, 0.2);
 }
 
 .badge-neutral {
@@ -156,24 +235,39 @@ a:hover {
   border-color: var(--border-primary);
 }
 
+.badge-cyber {
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--color-blue);
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  animation: cyberPulse 2s infinite;
+}
+
+@keyframes cyberPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-primary);
-  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--color-green), var(--color-cyan));
+  border-radius: var(--radius-sm);
   border: 2px solid var(--bg-primary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-tertiary);
+  background: linear-gradient(180deg, var(--color-cyan), var(--color-green));
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }
 
 /* Typography */
@@ -211,4 +305,77 @@ h4 { font-size: 14px; }
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Cyber Animations */
+.cyber-glow {
+  animation: cyberGlow 3s ease-in-out infinite;
+}
+
+@keyframes cyberGlow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(0, 255, 136, 0.2), 0 0 10px rgba(0, 255, 136, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4), 0 0 30px rgba(0, 255, 136, 0.2);
+  }
+}
+
+.cyber-border {
+  position: relative;
+}
+
+.cyber-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--color-green), var(--color-cyan), var(--color-blue), var(--color-green));
+  background-size: 400% 400%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: borderGradient 3s ease infinite;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.cyber-border:hover::before {
+  opacity: 1;
+}
+
+@keyframes borderGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.scan-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-green), transparent);
+  animation: scanLine 2s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes scanLine {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+.matrix-rain {
+  background-image: 
+    linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
 }

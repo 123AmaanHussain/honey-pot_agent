@@ -1,20 +1,35 @@
 .header {
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-primary);
+  border-bottom: 2px solid var(--border-primary);
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-green), var(--color-cyan));
 }
 
 .title {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   margin-bottom: 0.5rem;
   color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
 }
 
 .subtitle {
   color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 1rem;
+  letter-spacing: 1px;
 }
 
 .actions {
@@ -32,30 +47,36 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .reportBtn:hover {
   background: var(--bg-hover);
-  border-color: var(--text-secondary);
+  border-color: var(--color-green);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
 }
 
 .cybercrimeBtn {
-  background: rgba(248, 81, 73, 0.1);
+  background: rgba(255, 71, 87, 0.15);
   border: 1px solid var(--color-red);
   color: var(--color-red);
   padding: 0.5rem 1rem;
   border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  transition: all var(--transition-fast);
+  font-weight: 600;
+  transition: all var(--transition-base);
   text-decoration: none;
   display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .cybercrimeBtn:hover {
-  background: rgba(248, 81, 73, 0.2);
+  background: rgba(255, 71, 87, 0.25);
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
 }
 
 .grid {
@@ -73,11 +94,30 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-green), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-base);
 }
 
 .card:hover {
-  border-color: var(--border-accent);
+  border-color: var(--color-green);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+.card:hover::before {
+  opacity: 1;
 }
 
 .cardHeader {
@@ -229,11 +269,30 @@
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
   padding: 1rem;
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.sessionCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-green), var(--color-cyan));
+  opacity: 0;
+  transition: opacity var(--transition-base);
 }
 
 .sessionCard:hover {
-  border-color: var(--border-accent);
+  border-color: var(--color-green);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+}
+
+.sessionCard:hover::before {
+  opacity: 1;
 }
 
 .sessionHeader {

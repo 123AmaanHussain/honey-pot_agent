@@ -298,8 +298,8 @@ export default function IntelligenceHub() {
   return (
     <div className="slide-up">
       <header className={styles.header}>
-        <h1 className={styles.title}>Intelligence Hub</h1>
-        <p className={styles.subtitle}>Aggregated threat data extracted from {sessions.length} sessions.</p>
+        <h1 className={styles.title}>🧠 Intel Hub</h1>
+        <p className={styles.subtitle}>Aggregated threat intelligence extracted from {sessions.length} engagements.</p>
         <div className={styles.actions}>
           <a 
             href="https://cybercrime.gov.in/login" 
@@ -307,7 +307,7 @@ export default function IntelligenceHub() {
             rel="noopener noreferrer"
             className={styles.cybercrimeBtn}
           >
-            File Cybercrime Complaint
+            🚨 File Cybercrime Report
           </a>
         </div>
       </header>
@@ -320,7 +320,7 @@ export default function IntelligenceHub() {
       </div>
 
       <div className={styles.sessionsSection}>
-        <h2 className={styles.sectionTitle}>Session Details & Reports</h2>
+        <h2 className={styles.sectionTitle}>📋 Engagement Details & Reports</h2>
         <div className={styles.sessionList}>
           {intelBySession.map((session, idx) => (
             <div key={idx} className={styles.sessionCard}>
@@ -328,11 +328,11 @@ export default function IntelligenceHub() {
                 <span className={styles.sessionId}>{session.session_id}</span>
                 <span className={styles.sessionType}>{session.scammer_type}</span>
                 <span className={styles.sessionConfidence}>
-                  {(session.confidence * 100).toFixed(0)}% scam confidence
+                  {(session.confidence * 100).toFixed(0)}% threat confidence
                 </span>
                 {session.completed && (
                   <span className={styles.completedBadge}>
-                    Report Saved
+                    Threat Neutralized
                   </span>
                 )}
               </div>
@@ -367,7 +367,7 @@ export default function IntelligenceHub() {
                   className={styles.pdfBtn}
                   onClick={() => generateSessionPDF(session)}
                 >
-                  Download PDF Report
+                  📄 Download Threat Report
                 </button>
                 <a 
                   href={generateCybercrimeLink(session)}
@@ -375,7 +375,7 @@ export default function IntelligenceHub() {
                   rel="noopener noreferrer"
                   className={styles.complaintBtn}
                 >
-                  File Complaint
+                  🚨 File Complaint
                 </a>
               </div>
             </div>
