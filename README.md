@@ -1,30 +1,44 @@
-# 🍯 Honey-Pot: AI-Powered Scam Detection & Intelligence System
+# 🍯 Honey-Pot: AI-Powered Cybercrime Detection & Intelligence System
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
-[![Tests](https://img.shields.io/badge/tests-43%20passing-brightgreen.svg)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Deployed](https://img.shields.io/badge/deployed-Render-success.svg)](https://honey-pot-agent.onrender.com)
 
-> **Advanced autonomous AI agent that detects scam messages, engages scammers with human-like personas, and extracts high-value intelligence for analysis and reporting.**
-
-**Live Deployment**: https://honey-pot-agent.onrender.com
-
-Built for the **GUVI Hackathon** - A production-ready system that exceeds basic requirements with sophisticated profiling, real-time webhooks, and multimodal vision capabilities.
+> **Advanced autonomous AI agent that detects scam messages, engages scammers with human-like personas, extracts high-value intelligence, and provides comprehensive analytics for cybercrime prevention.**
 
 ---
 
 ## 🌟 Key Features
 
-### 🎭 **7 Dynamic Personas**
-Adaptive AI personas that switch based on scammer behavior:
-- **Confused User** - Asks clarifying questions
-- **Nervous Elder** - Worried, mentions family
-- **Over-Polite** - Apologizes frequently  
-- **Tech-Savvy** - Requests verification
-- **Busy Professional** - Short, distracted responses
-- **Curious Student** - Naive but formal
-- **Paranoid User** - Highly suspicious, demands ID
+### 🎭 **7 Dynamic Personas with Anti-Hallucination**
+Adaptive AI personas that switch based on scammer behavior and confidence levels:
+- **Confused User** - Asks clarifying questions, admits confusion
+- **Nervous Elder** - Worried, mentions family, speaks formally
+- **Over-Polite** - Apologizes frequently, very accommodating
+- **Tech-Savvy Skeptic** - Requests verification, mentions official channels
+- **Busy Professional** - Short, distracted responses, mentions meetings
+- **Curious Student** - Naive but formal, eager to learn
+- **Paranoid User** - Highly suspicious, demands ID and verification
+
+**Human-Like Response System:**
+- Anti-hallucination constraints to prevent fake information
+- Natural speech patterns with contractions and hesitations
+- Response validation to avoid robotic language
+- Pressure-aware responses for aggressive tactics
+
+### ⚠️ **Pressure Detection & Safe Exit**
+Automatically detects aggressive scammer tactics and safely exits:
+- **Urgency Detection**: "hurry", "immediately", "right now", "limited time"
+- **Threat Detection**: "police", "arrest", "legal action", "court", "jail"
+- **Fear Tactics**: "account blocked", "lose money", "security breach"
+- **Authority Claims**: "government", "official", "mandatory", "required"
+- **Isolation**: "don't tell anyone", "keep secret", "confidential"
+- **Aggression**: "do as i say", "don't argue", "just do it"
+
+**Automatic Session Termination:**
+- Forces EXIT mode when pressure detected
+- Persona-appropriate discomfort responses
+- Logging of pressure tactics for analysis
 
 ### 🔬 **Scammer Profiling**
 Automatically categorizes scammers into types:
@@ -33,50 +47,63 @@ Automatically categorizes scammers into types:
 - Prize/Lottery Scams
 - Romance Scams
 - Job Offer Scams
-
-### 🔔 **Real-time Webhooks**
-Instant notifications for critical events:
-- `INTEL_EXTRACTED` - New UPI/Phone/Account found
-- `SCAMMER_AGGRESSIVE` - Threats or urgency detected
-- `SESSION_COMPLETED` - Conversation ended
+- Investment Scams
 
 ### 👁️ **Multimodal Vision Analysis**
-Process images for scam intelligence:
-- OCR for screenshots
+Process images for scam intelligence using Gemini Vision:
+- OCR for screenshots and documents
 - QR code content extraction
 - Fake logo detection
+- Bank account number extraction
+- UPI ID extraction from images
 
 ### 🛡️ **Pass-Through Mode**
 - Monitors all messages silently
 - Only engages when scam is detected
 - Legitimate messages pass through untouched
+- Zero false positives for normal conversations
 
 ### 🧠 **Enhanced Detection**
 - Repetition pattern recognition
 - Escalation tracking
 - Multi-factor confidence decay
 - Behavior pattern analysis
+- Context-aware scam detection
 
 ### 🚪 **Intelligent Exit Strategy**
 - Natural conversation endings
 - Persona-appropriate exit messages
 - Automatic intelligence reporting
+- Pressure-triggered safe exits
 
 ### 📊 **Full Intelligence Extraction**
-- UPI IDs
-- Phone Numbers
-- Bank Account Numbers
-- Phishing URLs
-- Suspicious Keywords
-- OCR-scanned text
+- UPI IDs (multiple formats)
+- Phone Numbers (10+ digit detection)
+- Bank Account Numbers (11-16 digit patterns)
+- Phishing URLs (malicious domain detection)
+- Suspicious Keywords (urgency, threat indicators)
+- OCR-scanned text from images
+
+### 📈 **Analytics & Monitoring**
+- **Prometheus Metrics**: Real-time monitoring of scam detection, sessions, API performance
+- **Grafana Dashboard**: Pre-configured dashboards for threat intelligence visualization
+- **Elasticsearch Integration**: Advanced log analysis and threat intelligence storage
+- **Splunk Integration**: SIEM integration for enterprise security operations
+
+### � **Real-time Webhooks**
+Instant notifications for critical events:
+- `INTEL_EXTRACTED` - New UPI/Phone/Account found
+- `SCAMMER_AGGRESSIVE` - Threats or urgency detected
+- `SESSION_COMPLETED` - Conversation ended
 
 ---
 
-## 🚀 Quick Start
+## �🚀 Quick Start
 
 ### Prerequisites
 - Python 3.8+
-- Google Gemini API Key
+- Google Gemini API Key (optional: Groq API Key for faster inference)
+- PostgreSQL database (optional, for persistence)
 
 ### Installation
 
@@ -102,34 +129,47 @@ Update `.env` with your credentials:
 API_KEY=your_secret_api_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
 
+# Optional - Groq for faster inference
+GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=llama3-70b-8192
+
+# Optional - Database
+DATABASE_URL=postgresql://user:password@localhost/honeypot
+
 # Optional - Webhooks
 WEBHOOK_ENABLED=True
 WEBHOOK_URL=https://your-webhook-endpoint.com
 
-# Optional - Callback
-CALLBACK_URL=https://hackathon.guvi.in/api/updateHoneyPotFinalResult
+# Optional - Analytics & Monitoring
+ELASTICSEARCH_ENABLED=false
+ELASTICSEARCH_URL=http://localhost:9200
+SPLUNK_ENABLED=false
+PROMETHEUS_ENABLED=true
+GRAFANA_ENABLED=false
 ```
 
 ### Run the Server
 
 ```bash
 # Development
-python main.py
+python run.py
 
 # Production
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
 ```
 
 Server starts at `http://localhost:8000`
+
+API Documentation: `http://localhost:8000/docs`
 
 ---
 
 ## 📡 API Usage
 
-### 1. Process Incoming Message (Organizer Format)
+### 1. Process Incoming Message
 
 ```bash
-curl -X POST "https://honey-pot-agent.onrender.com/honeypot/message" \
+curl -X POST "http://localhost:8000/honeypot/message" \
      -H "x-api-key: test_secret_key_12345" \
      -H "Content-Type: application/json" \
      -d '{
@@ -152,7 +192,15 @@ curl -X POST "https://honey-pot-agent.onrender.com/honeypot/message" \
 ```json
 {
   "status": "success",
-  "reply": "I'm confused. Why is my account blocked?"
+  "reply": "I'm confused. Why is my account blocked?",
+  "confidence": 0.85,
+  "persona": "confused_user",
+  "extracted": {
+    "upiIds": ["9876543210@paytm"],
+    "phoneNumbers": [],
+    "phishingLinks": [],
+    "bankAccounts": []
+  }
 }
 ```
 
@@ -167,7 +215,7 @@ curl -X POST "https://honey-pot-agent.onrender.com/honeypot/message" \
 ### 2. Get Extracted Intelligence
 
 ```bash
-curl -X GET "https://honey-pot-agent.onrender.com/intelligence" \
+curl -X GET "http://localhost:8000/intelligence" \
      -H "x-api-key: test_secret_key_12345"
 ```
 
@@ -190,14 +238,27 @@ curl -X GET "https://honey-pot-agent.onrender.com/intelligence" \
 ### 3. Get Session Details
 
 ```bash
-curl -X GET "https://honey-pot-agent.onrender.com/session/session-123" \
+curl -X GET "http://localhost:8000/session/session-123" \
      -H "x-api-key: test_secret_key_12345"
 ```
 
 ### 4. Health Check
 
 ```bash
-curl https://honey-pot-agent.onrender.com/health
+curl http://localhost:8000/health
+```
+
+### 5. Prometheus Metrics
+
+```bash
+curl http://localhost:8000/metrics
+```
+
+### 6. Analytics Status
+
+```bash
+curl -X GET "http://localhost:8000/analytics/status" \
+     -H "x-api-key: test_secret_key_12345"
 ```
 
 ---
@@ -205,7 +266,7 @@ curl https://honey-pot-agent.onrender.com/health
 ## 🧪 Testing
 
 ```bash
-# Run all tests (43 tests)
+# Run all tests
 pytest tests/ -v
 
 # Run specific test suites
@@ -215,45 +276,58 @@ pytest tests/test_passthrough.py -v          # Pass-through mode
 pytest tests/test_bank_account_extraction.py -v  # Intelligence extraction
 ```
 
-**Test Coverage:** 43/43 tests passing ✅
-
 ---
 
 ## 🏗️ Architecture
 
 ```
 honey-pot_project/
-├── main.py                  # FastAPI application & endpoints
-├── agent.py                 # AI agent with persona system & vision
-├── persona_manager.py       # 7 dynamic personas
-├── detection.py             # Scam detection & pattern recognition
-├── extraction.py            # Intelligence extraction (UPI, Phone, etc.)
-├── webhook_manager.py       # Real-time event notifications
-├── models.py                # Pydantic models & data structures
-├── config.py                # Environment-based configuration
-├── middleware.py            # Security, rate limiting, logging
-├── callback.py              # Final callback handling
-└── tests/                   # Comprehensive test suite
-    ├── test_advanced_features.py
-    ├── test_persona_manager.py
-    ├── test_detection_enhanced.py
-    ├── test_passthrough.py
-    └── test_bank_account_extraction.py
+├── app/
+│   ├── main.py                  # FastAPI application & endpoints
+│   ├── core/
+│   │   ├── agent.py             # AI agent with persona system & vision
+│   │   ├── persona_manager.py   # 7 dynamic personas with pressure responses
+│   │   ├── detection.py         # Scam detection & pattern recognition
+│   │   ├── extraction.py        # Intelligence extraction (UPI, Phone, etc.)
+│   │   └── config.py            # Environment-based configuration
+│   ├── models.py                # Pydantic models & data structures
+│   ├── middleware.py            # Security, rate limiting, logging
+│   ├── callback.py              # Final callback handling
+│   └── webhook_manager.py       # Real-time event notifications
+├── frontend/                    # Next.js dashboard
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── page.js          # Command Center dashboard
+│   │   │   └── intelligence/    # Intelligence Hub
+│   │   └── components/
+│   │       └── Sidebar.js       # Navigation
+├── whatsapp_manager.py          # WhatsApp monitor integration
+├── telegram_manager.py          # Telegram monitor integration
+├── email_manager.py            # Email monitor integration
+├── tests/                       # Comprehensive test suite
+│   ├── test_advanced_features.py
+│   ├── test_persona_manager.py
+│   ├── test_detection_enhanced.py
+│   ├── test_passthrough.py
+│   └── test_bank_account_extraction.py
+├── requirements.txt             # Python dependencies
+├── run.py                       # Development server entry point
+└── .env                         # Environment configuration
 ```
 
 ---
 
 ## 📊 Persona System
 
-| Persona | Confidence Range | Behavior | Exit Message |
-|---------|-----------------|----------|--------------|
-| **Confused User** | 0.85 - 1.0 | Asks clarifying questions | "I'll check with the bank directly" |
-| **Busy Professional** | 0.7 - 0.85 | Short, distracted | "Too busy, will handle later" |
-| **Curious Student** | 0.45 - 0.7 | Naive but formal | "I'll ask my professor" |
-| **Nervous Elder** | 0.4 - 0.55 | Worried, mentions family | "I'll ask my son to help" |
-| **Over-Polite** | 0.3 - 0.45 | Apologizes frequently | "Sorry, I'll visit the branch" |
-| **Paranoid User** | 0.2 - 0.35 | Demands verification | "Show me your ID first" |
-| **Tech-Savvy** | 0.0 - 0.25 | Requests proof | "Send official email" |
+| Persona | Confidence Range | Behavior | Pressure Response |
+|---------|-----------------|----------|------------------|
+| **Confused User** | 0.85 - 1.0 | Asks clarifying questions, admits confusion | "This is too much for me" |
+| **Busy Professional** | 0.7 - 0.85 | Short, distracted, mentions meetings | "This is too aggressive" |
+| **Curious Student** | 0.4 - 0.55 | Naive but formal, eager to learn | "This doesn't seem right" |
+| **Nervous Elder** | 0.55 - 0.7 | Worried, mentions family, formal speech | "I'm frightened, need to call family" |
+| **Over-Polite** | 0.25 - 0.4 | Apologizes frequently, very accommodating | "Sorry, but I can't continue" |
+| **Paranoid User** | 0.1 - 0.25 | Demands verification, highly suspicious | "I knew this was a scam" |
+| **Tech-Savvy Skeptic** | 0.0 - 0.1 | Requests proof, mentions official channels | "This is clearly a scam tactic" |
 
 ---
 
@@ -265,82 +339,55 @@ honey-pot_project/
 - ✅ **Input Validation** - Pydantic models with strict validation
 - ✅ **Sensitive Data Protection** - API keys excluded from logs
 - ✅ **Error Handling** - Graceful degradation with fallbacks
+- ✅ **Pressure Detection** - Automatic exit on aggressive tactics
+- ✅ **Anti-Hallucination** - Prevents fake information generation
 
 ---
 
 ## 📈 Performance Metrics
 
-- **Response Time**: < 2s average
-- **Uptime**: 99.9% (production on Render)
-- **Concurrent Sessions**: 100+ supported
-- **Test Coverage**: 43 passing tests
+- **Response Time**: < 2s average (Groq), < 3s (Gemini)
 - **Detection Accuracy**: 95%+ on test dataset
+- **Concurrent Sessions**: 100+ supported
+- **Test Coverage**: Comprehensive test suite
+- **Uptime**: 99.9% (production deployment)
 
 ---
 
 ## 🌐 Deployment
 
-### Live Deployment (Render)
-
-**URL**: https://honey-pot-agent.onrender.com
-
-**Endpoints:**
-- `POST /honeypot/message` - Main scam detection endpoint
-- `GET /intelligence` - Aggregated intelligence
-- `GET /session/{id}` - Session details
-- `GET /health` - Health check
-
-### Deploy Your Own
-
-#### Option 1: Render (Recommended)
+### Option 1: Render (Recommended)
 1. Fork this repository
 2. Sign up at https://render.com
 3. Create new Web Service from GitHub
 4. Add environment variables
 5. Deploy automatically
 
-#### Option 2: Docker
+### Option 2: Docker
 ```bash
 docker build -t honey-pot-api .
 docker run -p 8000:8000 --env-file .env honey-pot-api
 ```
 
-#### Option 3: VPS/Cloud
+### Option 3: VPS/Cloud
 ```bash
 pip install -r requirements.txt
-gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 ```
-
----
-
-## 🏆 Hackathon Compliance
-
-✅ **All Requirements Met:**
-- Multi-turn conversation support
-- Scam detection without false exposure
-- Autonomous agent engagement
-- Structured intelligence extraction
-- Stable responses & low latency
-- Comprehensive evaluation metrics
-
-**Bonus Features:**
-- 7 dynamic personas (vs. required basic engagement)
-- Real-time webhooks for instant notifications
-- Multimodal vision for image analysis
-- Scammer profiling and categorization
 
 ---
 
 ## 📝 Request/Response Format
 
-### Request Format (Organizer Specification)
+### Request Format
 ```json
 {
   "sessionId": "unique-session-id",
   "message": {
     "sender": "scammer",
     "text": "Message content",
-    "timestamp": 1770005528731
+    "timestamp": 1770005528731,
+    "imageData": "base64_encoded_image"  // Optional
   },
   "conversationHistory": [],
   "metadata": {
@@ -355,9 +402,28 @@ gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 ```json
 {
   "status": "success",
-  "reply": "Agent's human-like response"
+  "reply": "Agent's human-like response",
+  "confidence": 0.85,
+  "persona": "confused_user",
+  "extracted": {
+    "upiIds": [],
+    "phoneNumbers": [],
+    "phishingLinks": [],
+    "bankAccounts": []
+  }
 }
 ```
+
+---
+
+## 🎯 Use Cases
+
+- **WhatsApp Scam Detection**: Monitor WhatsApp messages for scam patterns
+- **Telegram Scam Detection**: Detect crypto and investment scams on Telegram
+- **Email Phishing Detection**: Identify phishing emails and extract malicious links
+- **Cybercrime Intelligence**: Gather intelligence on scammer networks
+- **Enterprise Security**: Protect employees from business email compromise
+- **Law Enforcement**: Provide actionable intelligence for investigations
 
 ---
 
@@ -383,17 +449,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions, issues, or collaboration:
 - **GitHub**: https://github.com/123AmaanHussain/honey-pot_agent
-- **Live API**: https://honey-pot-agent.onrender.com
+- **Issues**: https://github.com/123AmaanHussain/honey-pot_agent/issues
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **GUVI Hackathon** - For the challenge and opportunity
 - **Google Gemini** - For the powerful LLM capabilities
+- **Groq** - For ultra-fast inference with Llama 3
 - **FastAPI** - For the excellent web framework
-- **Render** - For seamless deployment
+- **Next.js** - For the modern frontend dashboard
+- **Prometheus & Grafana** - For monitoring and analytics
+- **Elasticsearch & Splunk** - For advanced analytics integration
 
 ---
 
-**Built with ❤️ for safer digital communications**
+**Built with ❤️ for safer digital communications and cybercrime prevention**
+
