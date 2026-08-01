@@ -17,21 +17,21 @@ export default async function Dashboard() {
   const confidencePercent = (average_confidence * 100).toFixed(1);
 
   return (
-    <div>
+    <div className="slide-up">
       <header className={styles.header}>
         <h1 className={styles.title}>System Overview</h1>
         <p className={styles.subtitle}>Real-time monitoring of Honey-Pot agent interactions.</p>
       </header>
 
       <div className={styles.grid}>
-        <div className={`glass-panel ${styles.statCard} ${styles.safe}`}>
+        <div className={`panel ${styles.statCard}`}>
           <div className={styles.statLabel}>Total Sessions</div>
           <div className={styles.statValue}>
             {total_sessions}
           </div>
         </div>
 
-        <div className={`glass-panel ${styles.statCard} ${styles.scam}`}>
+        <div className={`panel ${styles.statCard}`}>
           <div className={styles.statLabel}>Scams Detected</div>
           <div className={styles.statValue}>
             {scams_detected}
@@ -41,14 +41,14 @@ export default async function Dashboard() {
           </div>
         </div>
 
-        <div className={`glass-panel ${styles.statCard}`}>
+        <div className={`panel ${styles.statCard}`}>
           <div className={styles.statLabel}>Avg Scam Confidence</div>
           <div className={styles.statValue}>
             {confidencePercent}%
           </div>
         </div>
 
-        <div className={`glass-panel ${styles.statCard}`}>
+        <div className={`panel ${styles.statCard}`}>
           <div className={styles.statLabel}>Active / Completed</div>
           <div className={styles.statValue}>
             {active_sessions} <span className={styles.statSub}>/ {completed_sessions}</span>
@@ -57,7 +57,7 @@ export default async function Dashboard() {
       </div>
 
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}><span>⚡</span> System Status</h2>
+        <h2 className={styles.sectionTitle}>System Status</h2>
         <p style={{ color: 'var(--text-secondary)' }}>
           Honey-Pot Core API and Database persistence are currently fully operational.
           To view detailed data extracts (UPIs, phone numbers, links), navigate to the Intelligence Hub.

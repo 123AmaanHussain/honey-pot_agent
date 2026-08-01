@@ -4,9 +4,10 @@
   "description": "Honey-Pot WhatsApp monitor",
   "main": "whatsapp_monitor.js",
   "dependencies": {
-    "whatsapp-web.js": "^1.26.0",
-    "qrcode-terminal": "^0.12.0",
     "axios": "^1.7.0",
-    "dotenv": "^16.4.0"
+    "dotenv": "^16.4.0",
+    "node-telegram-bot-api": "^1.2.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.26.0"
   }
 }

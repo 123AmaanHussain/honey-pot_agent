@@ -39,6 +39,13 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at  TIMESTAMPTZ DEFAULT now()
 );
 
+-- Configuration table: store app configuration (like Telegram bot token)
+CREATE TABLE IF NOT EXISTS configuration (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_sessions_last_activity ON sessions(last_activity DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_completed ON sessions(completed);

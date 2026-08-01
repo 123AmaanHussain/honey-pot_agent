@@ -10,6 +10,8 @@ export default function Sidebar() {
   const links = [
     { href: '/', label: 'Overview', icon: '📊' },
     { href: '/monitor', label: 'WhatsApp Monitor', icon: '📱' },
+    { href: '/telegram', label: 'Telegram Monitor', icon: '✈️' },
+    { href: '/email', label: 'Email Monitor', icon: '📧' },
     { href: '/intelligence', label: 'Intelligence Hub', icon: '🧠' },
     { href: '/sessions', label: 'Session Logs', icon: '💬' },
     { href: '/simulator', label: 'Live Simulator', icon: '🎮' },
@@ -18,7 +20,6 @@ export default function Sidebar() {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
-        <span>🍯</span>
         <span>Honey<span className={styles.logoAccent}>Pot</span></span>
       </div>
       <nav className={styles.nav}>

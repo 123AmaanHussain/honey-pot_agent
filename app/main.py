@@ -961,6 +961,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from whatsapp_manager import start_monitor, stop_monitor, get_status, get_recent_output
+from telegram_manager import start_monitor as start_telegram_monitor, stop_monitor as stop_telegram_monitor, get_status as get_telegram_status, get_recent_output as get_telegram_recent_output, set_bot_token, bot_token
+from email_manager import start_monitor as start_email_monitor, stop_monitor as stop_email_monitor, get_status as get_email_status, get_recent_output as get_email_recent_output, set_email_config, email_config
 
 
 @app.post("/monitor/whatsapp/start", tags=["Monitor"])
@@ -988,7 +990,6 @@ async def stop_whatsapp_monitor(api_key: str = Depends(verify_api_key)):
 async def get_whatsapp_status(api_key: str = Depends(verify_api_key)):
     """
     Get current WhatsApp monitor status.
-    Includes QR code generation status and connection status.
     """
     status = get_status()
     return status
@@ -1001,10 +1002,147 @@ async def get_whatsapp_output(
 ):
     """
     Get recent output from WhatsApp monitor.
-    Useful for displaying QR code and connection messages.
     """
-    output = get_recent_output(lines=lines)
+    output = get_recent_output(lines)
     return output
+
+
+# Telegram Monitor Endpoints
+@app.post("/monitor/telegram/set-token", tags=["Monitor"])
+async def set_telegram_token_endpoint(
+    token: str,
+    api_key: str = Depends(verify_api_key)
+):
+    """
+    Set the Telegram bot token for the monitor and save encrypted to database.
+    """
+    logger.info("Setting Telegram bot token")
+    set_bot_token(token)
+    # Save to database with encryption for persistence
+    db_repo.upsert_config('telegram_bot_token', token, encrypt=True)
+    return {"status": "success", "message": "Bot token set and encrypted successfully"}
+
+
+@app.get("/monitor/telegram/token-status", tags=["Monitor"])
+async def get_telegram_token_status(api_key: str = Depends(verify_api_key)):
+    """
+    Check if Telegram bot token is set.
+    """
+    return {
+        "token_set": bool(bot_token),
+        "has_token": bool(bot_token)
+    }
+
+
+@app.post("/monitor/telegram/start", tags=["Monitor"])
+async def start_telegram_monitor_endpoint(api_key: str = Depends(verify_api_key)):
+    """
+    Start the Telegram monitor subprocess.
+    Returns status and PID of the monitor process.
+    """
+    logger.info("Starting Telegram monitor via API request")
+    result = start_telegram_monitor()
+    return result
+
+
+@app.post("/monitor/telegram/stop", tags=["Monitor"])
+async def stop_telegram_monitor_endpoint(api_key: str = Depends(verify_api_key)):
+    """
+    Stop the Telegram monitor subprocess.
+    """
+    logger.info("Stopping Telegram monitor via API request")
+    result = stop_telegram_monitor()
+    return result
+
+
+@app.get("/monitor/telegram/status", tags=["Monitor"])
+async def get_telegram_monitor_status(api_key: str = Depends(verify_api_key)):
+    """
+    Get the current status of the Telegram monitor.
+    """
+    result = get_telegram_status()
+    return result
+
+
+@app.get("/monitor/telegram/output", tags=["Monitor"])
+async def get_telegram_monitor_output(lines: int = 20, api_key: str = Depends(verify_api_key)):
+    """
+    Get recent output from the Telegram monitor.
+    """
+    result = get_telegram_recent_output(lines)
+    return result
+
+
+# Email Monitor Endpoints
+@app.post("/monitor/email/set-config", tags=["Monitor"])
+async def set_email_config_endpoint(
+    imap_host: str,
+    imap_port: str = "993",
+    imap_user: str = "",
+    imap_pass: str = "",
+    api_key: str = Depends(verify_api_key)
+):
+    """
+    Set the email configuration for the monitor and save encrypted to database.
+    """
+    logger.info("Setting email configuration")
+    set_email_config(imap_host, imap_port, imap_user, imap_pass)
+    # Save to database with encryption for persistence
+    db_repo.upsert_config('email_imap_host', imap_host, encrypt=True)
+    db_repo.upsert_config('email_imap_port', imap_port, encrypt=False)
+    db_repo.upsert_config('email_imap_user', imap_user, encrypt=True)
+    db_repo.upsert_config('email_imap_pass', imap_pass, encrypt=True)
+    return {"status": "success", "message": "Email configuration set and encrypted successfully"}
+
+
+@app.get("/monitor/email/config-status", tags=["Monitor"])
+async def get_email_config_status(api_key: str = Depends(verify_api_key)):
+    """
+    Check if email configuration is set.
+    """
+    return {
+        "config_set": bool(email_config),
+        "has_config": bool(email_config)
+    }
+
+
+@app.post("/monitor/email/start", tags=["Monitor"])
+async def start_email_monitor_endpoint(api_key: str = Depends(verify_api_key)):
+    """
+    Start the email monitor subprocess.
+    Returns status and PID of the monitor process.
+    """
+    logger.info("Starting email monitor via API request")
+    result = start_email_monitor()
+    return result
+
+
+@app.post("/monitor/email/stop", tags=["Monitor"])
+async def stop_email_monitor_endpoint(api_key: str = Depends(verify_api_key)):
+    """
+    Stop the email monitor subprocess.
+    """
+    logger.info("Stopping email monitor via API request")
+    result = stop_email_monitor()
+    return result
+
+
+@app.get("/monitor/email/status", tags=["Monitor"])
+async def get_email_monitor_status(api_key: str = Depends(verify_api_key)):
+    """
+    Get the current status of the email monitor.
+    """
+    result = get_email_status()
+    return result
+
+
+@app.get("/monitor/email/output", tags=["Monitor"])
+async def get_email_monitor_output(lines: int = 20, api_key: str = Depends(verify_api_key)):
+    """
+    Get recent output from the email monitor.
+    """
+    result = get_email_recent_output(lines)
+    return result
 
 
 # -------------------------

@@ -5,7 +5,7 @@ allowing the app to run in memory-only mode without any changes.
 """
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
 
 from .client import get_db, is_connected
@@ -17,6 +17,95 @@ except ImportError:
     PSYCOPG2_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
+
+
+# ─────────────────────────────────────────────
+# Configuration CRUD
+# ─────────────────────────────────────────────
+
+def upsert_config(key: str, value: str, encrypt: bool = False) -> bool:
+    """
+    Insert or update a configuration value in the database.
+    
+    Args:
+        key: Configuration key (e.g., 'telegram_bot_token')
+        value: Configuration value
+        encrypt: Whether to encrypt the value before storing (for sensitive data)
+        
+    Returns:
+        True on success, False if DB unavailable or error
+    """
+    if not is_connected():
+        return False
+    
+    try:
+        # Encrypt sensitive values
+        if encrypt:
+            try:
+                from app.utils.encryption import encrypt_data
+                value = encrypt_data(value)
+            except Exception as e:
+                logger.error(f"Failed to encrypt config {key}: {e}")
+                return False
+        
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO configuration (key, value, updated_at)
+                    VALUES (%s, %s, now())
+                    ON CONFLICT (key) 
+                    DO UPDATE SET value = %s, updated_at = now()
+                    """,
+                    (key, value, value)
+                )
+                conn.commit()
+                return True
+    except Exception as e:
+        logger.error(f"Failed to upsert config {key}: {e}")
+        return False
+
+
+def get_config(key: str, decrypt: bool = False) -> Optional[str]:
+    """
+    Get a configuration value from the database.
+    
+    Args:
+        key: Configuration key
+        decrypt: Whether to decrypt the value after retrieving (for sensitive data)
+        
+    Returns:
+        Configuration value or None if not found/DB unavailable
+    """
+    if not is_connected():
+        return None
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(
+                    "SELECT value FROM configuration WHERE key = %s",
+                    (key,)
+                )
+                row = cur.fetchone()
+                if not row:
+                    return None
+                
+                value = row['value']
+                
+                # Decrypt sensitive values
+                if decrypt:
+                    try:
+                        from app.utils.encryption import decrypt_data
+                        value = decrypt_data(value)
+                    except Exception as e:
+                        logger.error(f"Failed to decrypt config {key}: {e}")
+                        return None
+                
+                return value
+    except Exception as e:
+        logger.error(f"Failed to get config {key}: {e}")
+        return None
 
 
 # ─────────────────────────────────────────────
@@ -47,8 +136,8 @@ def upsert_session(session_id: str, session_data: dict) -> bool:
                         id, confidence, turns, completed,
                         scammer_type, scammer_profile,
                         current_persona, persona_history,
-                        behavior_patterns, last_activity
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        behavior_patterns, created_at, last_activity
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (id) DO UPDATE SET
                         confidence        = EXCLUDED.confidence,
                         turns             = EXCLUDED.turns,
@@ -70,7 +159,8 @@ def upsert_session(session_id: str, session_data: dict) -> bool:
                         session_data.get("current_persona"),
                         json.dumps(session_data.get("persona_history", [])),
                         json.dumps(session_data.get("behavior_patterns", {})),
-                        datetime.now(timezone.utc),
+                        datetime.now(timezone.utc),  # Store UTC time
+                        datetime.now(timezone.utc),  # Store UTC time
                     ),
                 )
         return True

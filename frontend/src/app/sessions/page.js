@@ -39,6 +39,7 @@ export default function SessionsList() {
                 <th>Scam Confidence</th>
                 <th>Turns</th>
                 <th>Last Persona</th>
+                <th>Last Activity</th>
               </tr>
             </thead>
             <tbody>
@@ -46,6 +47,15 @@ export default function SessionsList() {
                 const session = item.data;
                 const isCompleted = session.completed;
                 const confPercent = Math.round(session.confidence * 100);
+                const lastActivity = session.last_activity ? new Date(session.last_activity).toLocaleString('en-IN', { 
+                  timeZone: 'Asia/Kolkata',
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true
+                }) : 'N/A';
                 
                 return (
                   <tr 
@@ -65,6 +75,7 @@ export default function SessionsList() {
                     </td>
                     <td>{session.turns}</td>
                     <td>{session.current_persona || 'N/A'}</td>
+                    <td>{lastActivity}</td>
                   </tr>
                 );
               })}

@@ -77,6 +77,30 @@ export default function SessionDetail({ params }) {
               <span className={styles.metricLabel}>Current Persona</span>
               <span>{session.current_persona || 'N/A'}</span>
             </div>
+            <div className={styles.metricRow}>
+              <span className={styles.metricLabel}>Created</span>
+              <span>{session.created_at ? new Date(session.created_at).toLocaleString('en-IN', { 
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              }) : 'N/A'}</span>
+            </div>
+            <div className={styles.metricRow}>
+              <span className={styles.metricLabel}>Last Activity</span>
+              <span>{session.last_activity ? new Date(session.last_activity).toLocaleString('en-IN', { 
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              }) : 'N/A'}</span>
+            </div>
           </div>
 
           <div className={styles.panel}>

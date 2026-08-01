@@ -117,7 +117,16 @@ export default function IntelligenceHub() {
     yPos += 8;
     doc.text(`Confidence Score: ${(session.confidence * 100).toFixed(0)}%`, 25, yPos);
     yPos += 8;
-    doc.text(`Session Date: ${new Date(session.created_at).toLocaleString()}`, 25, yPos);
+    doc.text(`Session Date: ${new Date(session.created_at).toLocaleString('en-IN', { 
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    })}`, 25, yPos);
     yPos += 8;
     
     if (session.scammer_profile) {
@@ -287,7 +296,7 @@ export default function IntelligenceHub() {
   const linkSourceMap = createSourceMap(links, intelBySession);
 
   return (
-    <div>
+    <div className="slide-up">
       <header className={styles.header}>
         <h1 className={styles.title}>Intelligence Hub</h1>
         <p className={styles.subtitle}>Aggregated threat data extracted from {sessions.length} sessions.</p>
@@ -298,7 +307,7 @@ export default function IntelligenceHub() {
             rel="noopener noreferrer"
             className={styles.cybercrimeBtn}
           >
-            🛡️ File Cybercrime Complaint
+            File Cybercrime Complaint
           </a>
         </div>
       </header>
@@ -310,7 +319,7 @@ export default function IntelligenceHub() {
         <IntelCard title="Bank Accounts" icon="🏦" items={banks} sourceMap={bankSourceMap} />
       </div>
 
-      <div className={`glass-panel ${styles.sessionsSection}`}>
+      <div className={styles.sessionsSection}>
         <h2 className={styles.sectionTitle}>Session Details & Reports</h2>
         <div className={styles.sessionList}>
           {intelBySession.map((session, idx) => (
@@ -323,7 +332,7 @@ export default function IntelligenceHub() {
                 </span>
                 {session.completed && (
                   <span className={styles.completedBadge}>
-                    ✓ Report Saved
+                    Report Saved
                   </span>
                 )}
               </div>
@@ -341,7 +350,16 @@ export default function IntelligenceHub() {
                   <strong>Links:</strong> {session.phishingLinks.length > 0 ? session.phishingLinks.join(', ') : 'None'}
                 </div>
                 <div className={styles.sessionDate}>
-                  {new Date(session.created_at).toLocaleString()}
+                  {new Date(session.created_at).toLocaleString('en-IN', { 
+                    timeZone: 'Asia/Kolkata',
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                  })}
                 </div>
               </div>
               <div className={styles.sessionActions}>
@@ -349,7 +367,7 @@ export default function IntelligenceHub() {
                   className={styles.pdfBtn}
                   onClick={() => generateSessionPDF(session)}
                 >
-                  📄 Download PDF Report
+                  Download PDF Report
                 </button>
                 <a 
                   href={generateCybercrimeLink(session)}
@@ -357,7 +375,7 @@ export default function IntelligenceHub() {
                   rel="noopener noreferrer"
                   className={styles.complaintBtn}
                 >
-                  🛡️ File Complaint
+                  File Complaint
                 </a>
               </div>
             </div>
