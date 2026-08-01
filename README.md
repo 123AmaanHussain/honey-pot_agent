@@ -74,13 +74,6 @@ Automatically categorizes scammers into types:
 - Bank Account Numbers (11-16 digit patterns)
 - Phishing URLs (malicious domain detection)
 - Suspicious Keywords (urgency, threat indicators)
-- OCR-scanned text from images
-
-### 📈 **Analytics & Monitoring**
-- **Prometheus Metrics**: Real-time monitoring of scam detection, sessions, API performance
-- **Grafana Dashboard**: Pre-configured dashboards for threat intelligence visualization
-- **Elasticsearch Integration**: Advanced log analysis and threat intelligence storage
-- **Splunk Integration**: SIEM integration for enterprise security operations
 
 ### � **Real-time Webhooks**
 Instant notifications for critical events:
