@@ -1,0 +1,284 @@
+{
+  "test_messages": [
+    {
+      "id": "scam_001",
+      "label": "scam",
+      "category": "banking",
+      "message": "Your account is BLOCKED! Pay 500 to 9876543210@paytm NOW to unblock immediately!",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_002",
+      "label": "scam",
+      "category": "banking",
+      "message": "This is HDFC Bank. Your account has been flagged for suspicious activity. Please share your OTP to verify.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_003",
+      "label": "scam",
+      "category": "tech_support",
+      "message": "Hello, this is Microsoft support. We detected malware on your computer. Please download this tool to clean it.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_004",
+      "label": "scam",
+      "category": "tech_support",
+      "message": "Your Windows license has expired. Please pay ₹2,000 immediately to renew it or your system will be locked.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_005",
+      "label": "scam",
+      "category": "prize",
+      "message": "Congratulations! You've won ₹5,00,000 in our lucky draw. To claim, pay a small processing fee of ₹500.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_006",
+      "label": "scam",
+      "category": "prize",
+      "message": "You've been selected for a cash prize! Just pay ₹500 to receive your winnings before the offer expires.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_007",
+      "label": "scam",
+      "category": "romance",
+      "message": "I really like you. Can you send me some money for my mother's surgery? She's in the hospital.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_008",
+      "label": "scam",
+      "category": "romance",
+      "message": "My phone is broken and I need to talk to you. Can you send me ₹5,000 so I can buy a new one?",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_009",
+      "label": "scam",
+      "category": "job",
+      "message": "We have a work-from-home job paying ₹50,000/month. Just pay ₹2,000 for training materials to get started.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_010",
+      "label": "scam",
+      "category": "job",
+      "message": "Data entry job available - earn ₹500 per hour. Registration fee is ₹1,000 required.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_011",
+      "label": "scam",
+      "category": "investment",
+      "message": "I found a great investment opportunity that's giving 50% returns monthly. Would you like to know more?",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_012",
+      "label": "scam",
+      "category": "investment",
+      "message": "This crypto trading platform is amazing - I made ₹50,000 last week. Want me to add you to our group?",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_013",
+      "label": "scam",
+      "category": "urgency",
+      "message": "HURRY UP! This deal closes in 10 minutes! Send the money NOW or lose this forever!",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_014",
+      "label": "scam",
+      "category": "threat",
+      "message": "POLICE ARE ON THEIR WAY! Your account is involved in money laundering. Pay ₹10,000 now or face arrest!",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_015",
+      "label": "scam",
+      "category": "upi",
+      "message": "Send ₹1000 to 9876543210@paytm to verify your account. This is mandatory.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_016",
+      "label": "scam",
+      "category": "phishing",
+      "message": "Click here to verify your account: http://secure-bank-verification.com/login",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_017",
+      "label": "scam",
+      "category": "otp",
+      "message": "Please share the OTP you just received. It's for verification purposes only.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_018",
+      "label": "scam",
+      "category": "fear",
+      "message": "Your account will be frozen in 5 minutes if you don't verify immediately. Act now!",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_019",
+      "label": "scam",
+      "category": "authority",
+      "message": "This is government mandated. You must comply or face legal consequences.",
+      "expected_detection": true
+    },
+    {
+      "id": "scam_020",
+      "label": "scam",
+      "category": "isolation",
+      "message": "Don't tell anyone about this deal. This is just between us. Keep it secret.",
+      "expected_detection": true
+    },
+    {
+      "id": "legitimate_001",
+      "label": "legitimate",
+      "category": "banking",
+      "message": "Your account balance is ₹10,000. Thank you for banking with us.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_002",
+      "label": "legitimate",
+      "category": "banking",
+      "message": "Your debit card ending in 1234 has been used for ₹500 at Amazon.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_003",
+      "label": "legitimate",
+      "category": "banking",
+      "message": "Your loan EMI of ₹5,000 has been debited successfully.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_004",
+      "label": "legitimate",
+      "category": "personal",
+      "message": "Hey, are we still meeting for dinner tonight at 7pm?",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_005",
+      "label": "legitimate",
+      "category": "personal",
+      "message": "Can you send me the notes from today's class? I missed the lecture.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_006",
+      "label": "legitimate",
+      "category": "personal",
+      "message": "Happy birthday! Hope you have a great day!",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_007",
+      "label": "legitimate",
+      "category": "personal",
+      "message": "I'll be late for the meeting. Can we reschedule to 3pm?",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_008",
+      "label": "legitimate",
+      "category": "personal",
+      "message": "Thanks for your help with the project yesterday!",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_009",
+      "label": "legitimate",
+      "category": "service",
+      "message": "Your order #12345 has been shipped and will arrive in 2-3 business days.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_010",
+      "label": "legitimate",
+      "category": "service",
+      "message": "Your appointment is confirmed for tomorrow at 10am with Dr. Sharma.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_011",
+      "label": "legitimate",
+      "category": "service",
+      "message": "Your electricity bill of ₹2,500 is due on 15th. Please pay on time.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_012",
+      "label": "legitimate",
+      "category": "service",
+      "message": "Your internet plan has been renewed successfully. Valid till next month.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_013",
+      "label": "legitimate",
+      "category": "professional",
+      "message": "Please find attached the quarterly report for your review.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_014",
+      "label": "legitimate",
+      "category": "professional",
+      "message": "The meeting has been rescheduled to Friday at 2pm. Please confirm attendance.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_015",
+      "label": "legitimate",
+      "category": "professional",
+      "message": "Your leave application for next week has been approved.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_016",
+      "label": "legitimate",
+      "category": "professional",
+      "message": "Please submit your expense reports by end of day today.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_017",
+      "label": "legitimate",
+      "category": "otp",
+      "message": "Your OTP is 123456. Valid for 10 minutes. Do not share with anyone.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_018",
+      "label": "legitimate",
+      "category": "otp",
+      "message": "Use code 789012 to verify your mobile number. This code expires in 5 minutes.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_019",
+      "label": "legitimate",
+      "category": "banking",
+      "message": "Your fixed deposit has matured. Amount ₹50,000 credited to your account.",
+      "expected_detection": false
+    },
+    {
+      "id": "legitimate_020",
+      "label": "legitimate",
+      "category": "banking",
+      "message": "Your credit card statement is now available. Total due: ₹15,000.",
+      "expected_detection": false
+    }
+  ]
+}

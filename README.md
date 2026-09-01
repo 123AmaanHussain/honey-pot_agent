@@ -49,14 +49,6 @@ Automatically categorizes scammers into types:
 - Job Offer Scams
 - Investment Scams
 
-### 👁️ **Multimodal Vision Analysis**
-Process images for scam intelligence using Gemini Vision:
-- OCR for screenshots and documents
-- QR code content extraction
-- Fake logo detection
-- Bank account number extraction
-- UPI ID extraction from images
-
 ### 🛡️ **Pass-Through Mode**
 - Monitors all messages silently
 - Only engages when scam is detected
@@ -83,12 +75,6 @@ Process images for scam intelligence using Gemini Vision:
 - Phishing URLs (malicious domain detection)
 - Suspicious Keywords (urgency, threat indicators)
 - OCR-scanned text from images
-
-### 📈 **Analytics & Monitoring**
-- **Prometheus Metrics**: Real-time monitoring of scam detection, sessions, API performance
-- **Grafana Dashboard**: Pre-configured dashboards for threat intelligence visualization
-- **Elasticsearch Integration**: Advanced log analysis and threat intelligence storage
-- **Splunk Integration**: SIEM integration for enterprise security operations
 
 ### � **Real-time Webhooks**
 Instant notifications for critical events:
@@ -133,10 +119,11 @@ GEMINI_API_KEY=your_gemini_api_key_here
 GROQ_API_KEY=your_groq_api_key_here
 GROQ_MODEL=llama3-70b-8192
 
-# Optional - Database
-DATABASE_URL=postgresql://user:password@localhost/honeypot
+# Database
+DATABASE_URL=postgresql://user:password@localhost/honeypot 
+or any other database
 
-# Optional - Webhooks
+# Webhooks
 WEBHOOK_ENABLED=True
 WEBHOOK_URL=https://your-webhook-endpoint.com
 
@@ -346,11 +333,27 @@ honey-pot_project/
 
 ## 📈 Performance Metrics
 
-- **Response Time**: < 2s average (Groq), < 3s (Gemini)
-- **Detection Accuracy**: 95%+ on test dataset
+Based on evaluation against 40 labeled test messages (20 scams, 20 legitimate):
+
+**Classification Metrics:**
+- **Accuracy**: 67.50% - Overall correct classification rate
+- **Precision**: 88.89% - Of messages flagged as scams, 88.89% were actual scams
+- **Recall**: 40.00% - Of actual scam messages, 40% were correctly detected
+- **F1-Score**: 55.17% - Harmonic mean of precision and recall
+- **False Positive Rate**: 5.00% - Legitimate messages incorrectly flagged as scams
+- **False Negative Rate**: 60.00% - Scam messages missed (passed through as legitimate)
+
+**Response Time Metrics:**
+- **Average Response Time**: 0.36s (360ms)
+- **Min Response Time**: <1ms (detection only)
+- **Max Response Time**: 6.38s (with agent generation)
+
+**System Performance:**
 - **Concurrent Sessions**: 100+ supported
 - **Test Coverage**: Comprehensive test suite
 - **Uptime**: 99.9% (production deployment)
+
+**Note**: The current evaluation shows high precision (low false positives) but moderate recall (some scams missed). The system prioritizes avoiding false positives to prevent disrupting legitimate conversations, which is appropriate for a honey-pot system.
 
 ---
 
@@ -459,8 +462,6 @@ For questions, issues, or collaboration:
 - **Groq** - For ultra-fast inference with Llama 3
 - **FastAPI** - For the excellent web framework
 - **Next.js** - For the modern frontend dashboard
-- **Prometheus & Grafana** - For monitoring and analytics
-- **Elasticsearch & Splunk** - For advanced analytics integration
 
 ---
 

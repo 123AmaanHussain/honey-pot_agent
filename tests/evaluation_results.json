@@ -1,0 +1,302 @@
+{
+  "metrics": {
+    "accuracy": 0.675,
+    "precision": 0.8888888888888888,
+    "recall": 0.4,
+    "f1_score": 0.5517241379310346,
+    "false_positive_rate": 0.05,
+    "false_negative_rate": 0.6,
+    "avg_response_time": 0.35916423201560976,
+    "min_response_time": 6.4373016357421875e-06,
+    "max_response_time": 6.381179571151733,
+    "confusion_matrix": {
+      "true_positives": 8,
+      "true_negatives": 19,
+      "false_positives": 1,
+      "false_negatives": 12
+    }
+  },
+  "predictions": [
+    {
+      "id": "scam_001",
+      "actual": "scam",
+      "predicted": "scam",
+      "expected": "scam",
+      "response_time": 0.49027323722839355
+    },
+    {
+      "id": "scam_002",
+      "actual": "scam",
+      "predicted": "scam",
+      "expected": "scam",
+      "response_time": 0.24440431594848633
+    },
+    {
+      "id": "scam_003",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 2.0265579223632812e-05
+    },
+    {
+      "id": "scam_004",
+      "actual": "scam",
+      "predicted": "scam",
+      "expected": "scam",
+      "response_time": 0.25626063346862793
+    },
+    {
+      "id": "scam_005",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 2.5272369384765625e-05
+    },
+    {
+      "id": "scam_006",
+      "actual": "scam",
+      "predicted": "scam",
+      "expected": "scam",
+      "response_time": 0.5273008346557617
+    },
+    {
+      "id": "scam_007",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 2.6941299438476562e-05
+    },
+    {
+      "id": "scam_008",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 1.9073486328125e-05
+    },
+    {
+      "id": "scam_009",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 2.288818359375e-05
+    },
+    {
+      "id": "scam_010",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 2.002716064453125e-05
+    },
+    {
+      "id": "scam_011",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 1.0728836059570312e-05
+    },
+    {
+      "id": "scam_012",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 0.00012159347534179688
+    },
+    {
+      "id": "scam_013",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 1.1205673217773438e-05
+    },
+    {
+      "id": "scam_014",
+      "actual": "scam",
+      "predicted": "scam",
+      "expected": "scam",
+      "response_time": 0.35639500617980957
+    },
+    {
+      "id": "scam_015",
+      "actual": "scam",
+      "predicted": "scam",
+      "expected": "scam",
+      "response_time": 0.21693849563598633
+    },
+    {
+      "id": "scam_016",
+      "actual": "scam",
+      "predicted": "scam",
+      "expected": "scam",
+      "response_time": 0.20850419998168945
+    },
+    {
+      "id": "scam_017",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 3.337860107421875e-05
+    },
+    {
+      "id": "scam_018",
+      "actual": "scam",
+      "predicted": "scam",
+      "expected": "scam",
+      "response_time": 6.381179571151733
+    },
+    {
+      "id": "scam_019",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 2.8848648071289062e-05
+    },
+    {
+      "id": "scam_020",
+      "actual": "scam",
+      "predicted": "legitimate",
+      "expected": "scam",
+      "response_time": 1.7642974853515625e-05
+    },
+    {
+      "id": "legitimate_001",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.2874603271484375e-05
+    },
+    {
+      "id": "legitimate_002",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 9.059906005859375e-06
+    },
+    {
+      "id": "legitimate_003",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 8.344650268554688e-06
+    },
+    {
+      "id": "legitimate_004",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 6.4373016357421875e-06
+    },
+    {
+      "id": "legitimate_005",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.71661376953125e-05
+    },
+    {
+      "id": "legitimate_006",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.8596649169921875e-05
+    },
+    {
+      "id": "legitimate_007",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.6689300537109375e-05
+    },
+    {
+      "id": "legitimate_008",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.6450881958007812e-05
+    },
+    {
+      "id": "legitimate_009",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.5020370483398438e-05
+    },
+    {
+      "id": "legitimate_010",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 9.059906005859375e-06
+    },
+    {
+      "id": "legitimate_011",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 2.384185791015625e-05
+    },
+    {
+      "id": "legitimate_012",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.3589859008789062e-05
+    },
+    {
+      "id": "legitimate_013",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 7.867813110351562e-06
+    },
+    {
+      "id": "legitimate_014",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 9.5367431640625e-06
+    },
+    {
+      "id": "legitimate_015",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.2874603271484375e-05
+    },
+    {
+      "id": "legitimate_016",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 8.106231689453125e-06
+    },
+    {
+      "id": "legitimate_017",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 7.867813110351562e-06
+    },
+    {
+      "id": "legitimate_018",
+      "actual": "legitimate",
+      "predicted": "scam",
+      "expected": "legitimate",
+      "response_time": 5.684691429138184
+    },
+    {
+      "id": "legitimate_019",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 3.838539123535156e-05
+    },
+    {
+      "id": "legitimate_020",
+      "actual": "legitimate",
+      "predicted": "legitimate",
+      "expected": "legitimate",
+      "response_time": 1.1920928955078125e-05
+    }
+  ],
+  "errors": []
+}

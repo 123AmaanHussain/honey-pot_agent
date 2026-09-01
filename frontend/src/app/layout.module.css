@@ -134,3 +134,35 @@
   pointer-events: none;
   z-index: -1;
 }
+
+.themeToggleContainer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-primary);
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-primary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+}
+
+.logo::before {
+  content: '🎯';
+  font-size: 24px;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.5));
+}
+
+.logoAccent {
+  color: var(--color-green);
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}

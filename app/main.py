@@ -974,7 +974,7 @@ from email_manager import start_monitor as start_email_monitor, stop_monitor as 
 
 
 @app.post("/monitor/whatsapp/start", tags=["Monitor"])
-async def start_whatsapp_monitor(api_key: str = Depends(verify_api_key)):
+async def start_whatsapp_monitor():
     """
     Start the WhatsApp monitor subprocess.
     Returns status and PID of the monitor process.
@@ -985,7 +985,7 @@ async def start_whatsapp_monitor(api_key: str = Depends(verify_api_key)):
 
 
 @app.post("/monitor/whatsapp/stop", tags=["Monitor"])
-async def stop_whatsapp_monitor(api_key: str = Depends(verify_api_key)):
+async def stop_whatsapp_monitor():
     """
     Stop the WhatsApp monitor subprocess.
     """
@@ -995,7 +995,7 @@ async def stop_whatsapp_monitor(api_key: str = Depends(verify_api_key)):
 
 
 @app.get("/monitor/whatsapp/status", tags=["Monitor"])
-async def get_whatsapp_status(api_key: str = Depends(verify_api_key)):
+async def get_whatsapp_status():
     """
     Get current WhatsApp monitor status.
     """
@@ -1005,8 +1005,7 @@ async def get_whatsapp_status(api_key: str = Depends(verify_api_key)):
 
 @app.get("/monitor/whatsapp/output", tags=["Monitor"])
 async def get_whatsapp_output(
-    lines: int = 20,
-    api_key: str = Depends(verify_api_key)
+    lines: int = 20
 ):
     """
     Get recent output from WhatsApp monitor.
@@ -1018,21 +1017,21 @@ async def get_whatsapp_output(
 # Telegram Monitor Endpoints
 @app.post("/monitor/telegram/set-token", tags=["Monitor"])
 async def set_telegram_token_endpoint(
-    token: str,
-    api_key: str = Depends(verify_api_key)
+    token: str
 ):
     """
     Set the Telegram bot token for the monitor and save encrypted to database.
     """
     logger.info("Setting Telegram bot token")
     set_bot_token(token)
-    # Save to database with encryption for persistence
+    
+    # Save to database
     db_repo.upsert_config('telegram_bot_token', token, encrypt=True)
     return {"status": "success", "message": "Bot token set and encrypted successfully"}
 
 
 @app.get("/monitor/telegram/token-status", tags=["Monitor"])
-async def get_telegram_token_status(api_key: str = Depends(verify_api_key)):
+async def get_telegram_token_status():
     """
     Check if Telegram bot token is set.
     """
@@ -1043,7 +1042,7 @@ async def get_telegram_token_status(api_key: str = Depends(verify_api_key)):
 
 
 @app.post("/monitor/telegram/start", tags=["Monitor"])
-async def start_telegram_monitor_endpoint(api_key: str = Depends(verify_api_key)):
+async def start_telegram_monitor_endpoint():
     """
     Start the Telegram monitor subprocess.
     Returns status and PID of the monitor process.
@@ -1054,7 +1053,7 @@ async def start_telegram_monitor_endpoint(api_key: str = Depends(verify_api_key)
 
 
 @app.post("/monitor/telegram/stop", tags=["Monitor"])
-async def stop_telegram_monitor_endpoint(api_key: str = Depends(verify_api_key)):
+async def stop_telegram_monitor_endpoint():
     """
     Stop the Telegram monitor subprocess.
     """
@@ -1064,7 +1063,7 @@ async def stop_telegram_monitor_endpoint(api_key: str = Depends(verify_api_key))
 
 
 @app.get("/monitor/telegram/status", tags=["Monitor"])
-async def get_telegram_monitor_status(api_key: str = Depends(verify_api_key)):
+async def get_telegram_monitor_status():
     """
     Get the current status of the Telegram monitor.
     """
@@ -1073,7 +1072,7 @@ async def get_telegram_monitor_status(api_key: str = Depends(verify_api_key)):
 
 
 @app.get("/monitor/telegram/output", tags=["Monitor"])
-async def get_telegram_monitor_output(lines: int = 20, api_key: str = Depends(verify_api_key)):
+async def get_telegram_monitor_output(lines: int = 20):
     """
     Get recent output from the Telegram monitor.
     """
@@ -1087,8 +1086,7 @@ async def set_email_config_endpoint(
     imap_host: str,
     imap_port: str = "993",
     imap_user: str = "",
-    imap_pass: str = "",
-    api_key: str = Depends(verify_api_key)
+    imap_pass: str = ""
 ):
     """
     Set the email configuration for the monitor and save encrypted to database.
@@ -1104,7 +1102,7 @@ async def set_email_config_endpoint(
 
 
 @app.get("/monitor/email/config-status", tags=["Monitor"])
-async def get_email_config_status(api_key: str = Depends(verify_api_key)):
+async def get_email_config_status():
     """
     Check if email configuration is set.
     """
@@ -1115,7 +1113,7 @@ async def get_email_config_status(api_key: str = Depends(verify_api_key)):
 
 
 @app.post("/monitor/email/start", tags=["Monitor"])
-async def start_email_monitor_endpoint(api_key: str = Depends(verify_api_key)):
+async def start_email_monitor_endpoint():
     """
     Start the email monitor subprocess.
     Returns status and PID of the monitor process.
@@ -1126,7 +1124,7 @@ async def start_email_monitor_endpoint(api_key: str = Depends(verify_api_key)):
 
 
 @app.post("/monitor/email/stop", tags=["Monitor"])
-async def stop_email_monitor_endpoint(api_key: str = Depends(verify_api_key)):
+async def stop_email_monitor_endpoint():
     """
     Stop the email monitor subprocess.
     """
@@ -1136,7 +1134,7 @@ async def stop_email_monitor_endpoint(api_key: str = Depends(verify_api_key)):
 
 
 @app.get("/monitor/email/status", tags=["Monitor"])
-async def get_email_monitor_status(api_key: str = Depends(verify_api_key)):
+async def get_email_monitor_status():
     """
     Get the current status of the email monitor.
     """
@@ -1145,7 +1143,7 @@ async def get_email_monitor_status(api_key: str = Depends(verify_api_key)):
 
 
 @app.get("/monitor/email/output", tags=["Monitor"])
-async def get_email_monitor_output(lines: int = 20, api_key: str = Depends(verify_api_key)):
+async def get_email_monitor_output(lines: int = 20):
     """
     Get recent output from the email monitor.
     """
