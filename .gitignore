@@ -99,3 +99,6 @@ dashboard/.next/
 dashboard/node_modules/
 dashboard/out/
 dashboard/.turbo/
+
+# Project status files
+PROJECT_STATUS.md
