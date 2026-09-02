@@ -22,7 +22,7 @@ Adaptive AI personas that switch based on scammer behavior and confidence levels
 - **Paranoid User** — "how did you even get my number?"
 
 **Human-Like Response Engine:**
-- **Live LLM generation** (Groq Qwen 3.8-27B, Gemini fallback) — no predefined message templates
+- **Live LLM generation** (Groq Qwen 3.8-27B, Gemini as backup if Groq is unavailable) — no predefined message templates
 - **Context-aware replies** — stays on-topic, remembers UPI IDs/names/amounts mentioned earlier
 - **Anti-hallucination** — never invents facts not present in conversation
 - **Subtle intel gathering** — naturally asks about UPI/phone/link/bank details to funnel them
@@ -99,7 +99,7 @@ Immediate safe exit with zero further engagement:
 
 ### Prerequisites
 - Python 3.10+
-- Groq API Key (primary LLM) + Google Gemini API Key (fallback)
+- Groq API Key (primary LLM) · Google Gemini API Key (optional backup)
 - PostgreSQL database (optional, for persistence)
 
 ### Installation
@@ -124,11 +124,13 @@ Update `.env` with your credentials:
 ```env
 # Required
 API_KEY=your_secret_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
 
-# LLM provider (Groq for fast inference)
+# Primary LLM provider (Groq)
 GROQ_API_KEY=your_groq_api_key_here
 GROQ_MODEL=qwen/qwen3.8-27b
+
+# Optional backup LLM (Gemini — used only if Groq is unavailable)
+GEMINI_API_KEY=your_gemini_api_key_here
 
 # Database
 DATABASE_URL=postgresql://user:password@localhost/honeypot
@@ -281,7 +283,7 @@ Evaluated against an **86-message dataset** across **18 scam categories** (49 sc
 - ✅ **Rate Limiting** — protection against abuse
 - ✅ **Sensitive Data Protection** — API keys excluded from logs
 - ✅ **Data Encryption** — extracted intelligence encrypted (Fernet)
-- ✅ **Graceful Degradation** — Groq → Gemini → fallback chain
+- ✅ **Graceful Degradation** — Groq → Gemini (backup) → fallback chain
 - ✅ **Safe Exits** — pressure-triggered immediate disengagement
 
 ---
@@ -311,7 +313,7 @@ MIT License — see the [LICENSE](LICENSE) file.
 ## 🙏 Acknowledgments
 
 - **Groq** — ultra-fast LLM inference (Qwen 3.8-27B)
-- **Google Gemini** — reliable fallback + vision intelligence
+- **Google Gemini** — backup LLM + vision intelligence
 - **FastAPI** — web framework
 - **Next.js / React** — modern dashboard
 
