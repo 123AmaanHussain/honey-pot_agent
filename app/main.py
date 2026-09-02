@@ -715,7 +715,8 @@ async def handle_message(
                 'sender_email': message_obj.get("sender_email"),
                 'sender_phone': message_obj.get("sender_phone"),
                 'sender_profile': message_obj.get("sender_profile"),
-                'sender_name': message_obj.get("sender_name")
+                'sender_name': message_obj.get("sender_name"),
+                'session_id': session_id,
             }
         else:
             message_text = str(message_obj)
@@ -1435,6 +1436,28 @@ async def list_patterns(api_key: str = Depends(verify_api_key)):
     """List extracted patterns from accumulated corrections."""
     from app.core.feedback import get_patterns
     return {"patterns": get_patterns()}
+
+
+# -------------------------
+# Trust Profile Endpoints
+# -------------------------
+
+@app.get("/trust/stats", tags=["Trust"])
+async def trust_stats(api_key: str = Depends(verify_api_key)):
+    """Get trust profile statistics — known contacts, trusted, suspicious."""
+    from app.core.trust import get_trust_stats
+    return get_trust_stats()
+
+
+@app.get("/trust/profile/{sender_id}", tags=["Trust"])
+async def trust_profile(sender_id: str, api_key: str = Depends(verify_api_key)):
+    """Get trust profile for a specific sender (phone or name)."""
+    from app.core.trust import get_trust_profile
+    # Try as phone first, then as name
+    profile = get_trust_profile(phone=sender_id)
+    if profile["trust_level"] == "unknown":
+        profile = get_trust_profile(name=sender_id)
+    return profile
 
 
 @app.get("/", tags=["Info"])

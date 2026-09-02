@@ -182,6 +182,62 @@ def detect_scam_llm(message: str, message_history: List[Dict] = None, sender_inf
                 "scam_type": "LEGITIMATE",
                 "cached": True,
             }
+
+    except ImportError:
+        pass  # feedback module not available
+
+    # ──────────────────────────────────────────────────────────────────
+    # LAYER 1.5: Trust Profile — check sender history and behavior
+    # ──────────────────────────────────────────────────────────────────
+    sender_context = ""
+    trust_level = "unknown"
+    try:
+        from app.core.trust import (
+            get_sender_context, classify_message_type,
+            update_trust_profile, get_trust_profile, TrustLevel
+        )
+
+        phone = sender_info.get("sender_phone", "")
+        name = sender_info.get("sender_name", "")
+        session_id = sender_info.get("session_id", "")
+
+        # Get sender trust profile
+        profile = get_trust_profile(phone=phone, name=name, session_id=session_id)
+        trust_level = profile["trust_level"]
+
+        # Classify the current message type
+        msg_type = classify_message_type(message)
+
+        # Update the trust profile with this message
+        update_trust_profile(
+            phone=phone, name=name, session_id=session_id,
+            message_type=msg_type, is_scam=False,  # Will update later if scam
+        )
+
+        # Get context string for the LLM prompt
+        sender_context = get_sender_context(phone=phone, name=name, session_id=session_id)
+
+        # TRUST-BASED OVERRIDE: Known contacts get benefit of doubt
+        # If sender is TRUSTED and current message is casual/greeting → skip LLM
+        if trust_level == TrustLevel.TRUSTED and msg_type in ("greeting", "casual"):
+            logger.info(
+                f"Trust override: TRUSTED sender with casual message — returning legitimate",
+                extra={"sender_key": profile["key"], "msg_type": msg_type},
+            )
+            return {
+                "is_scam": False,
+                "confidence": 0.98,
+                "flags": ["trusted_contact"],
+                "reasoning": f"Known trusted contact ({profile['name'] or profile['phone']}) — casual message, not a scam",
+                "scam_type": "LEGITIMATE",
+                "trust_override": True,
+            }
+
+        # KNOWN contacts: lower scam confidence unless strong evidence
+        # (the LLM will still analyze, but we inject context to help it decide)
+
+    except ImportError:
+        pass  # Trust module not available — continue without trust context
     except ImportError:
         pass  # feedback module not available — continue with LLM
 
@@ -236,6 +292,9 @@ CRITICAL RULE: You are analyzing ONLY the CURRENT MESSAGE below. Do NOT flag mes
 SENDER INFORMATION:
 {sender_text if sender_text else "No sender information provided"}
 
+SENDER TRUST PROFILE:
+{sender_context if sender_context else "No trust history available — treat as unknown sender."}
+
 CONVERSATION HISTORY (for context only — do NOT use to flag the current message):
 {history_text if history_text else "No conversation history"}
 {fewshot_section}
@@ -244,9 +303,21 @@ CURRENT MESSAGE TO ANALYZE:
 
 ANALYSIS STEPS:
 
+STEP 0: SENDER TRUST CHECK (most important)
+   - If sender is TRUSTED (long history, never suspicious):
+     → Give HIGH benefit of doubt. Only flag if there are STRONG scam indicators.
+     → A trusted contact asking for money once is NOT automatically a scam.
+   - If sender is KNOWN (some history, normal behavior):
+     → Give moderate benefit of doubt. Consider their history.
+   - If sender is UNKNOWN (first interaction):
+     → No benefit of doubt. Apply full scam analysis.
+   - If sender is SUSPICIOUS (known but flagged before):
+     → Extra scrutiny. They may have a compromised account.
+
 STEP 1: Is the current message a greeting, casual chat, or friendly message?
    - "Hello", "Hey", "How are you?", "Good morning", "Happy birthday" → LIKELY LEGITIMATE
    - Do NOT flag greetings as scam just because later messages in history ask for money
+   - For TRUSTED/KNOWN contacts: greetings and casual chat are ALWAYS legitimate
 
 STEP 2: Does the current message contain ANY of these scam indicators?
    - Asks for money, UPI, bank details, OTP, or personal information
@@ -264,6 +335,13 @@ STEP 4: Minimum evidence requirement
    - A message needs AT LEAST 2 scam indicators to be flagged as scam
    - Single keywords like "account" or "money" alone are NOT enough
    - Casual conversation about money ("I need money for rent") is NOT a scam
+   - For KNOWN/TRUSTED contacts: require 3+ indicators (higher bar)
+
+STEP 5: Compromised account detection
+   - If sender is KNOWN/TRUSTED but suddenly sends messages with 3+ scam indicators
+     → This may be a COMPROMISED ACCOUNT. Flag as scam but note it.
+   - If a known contact asks for money in an unusual way (UPI, crypto, gift cards)
+     → Treat as potential compromise unless the request is normal for that contact
 
 LEGITIMATE INDICATORS (mark as NOT scam if these apply):
 - Bank transaction alerts (credits, debits, EMI) from known banks
