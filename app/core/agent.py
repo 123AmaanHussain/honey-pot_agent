@@ -79,12 +79,12 @@ def detect_pressure(message: str) -> tuple[bool, str]:
     msg = message.lower()
     
     pressure_indicators = {
-        "urgency": ["hurry", "quickly", "immediately", "right now", "fast", "asap", "urgent", "don't wait", "time is running", "limited time"],
+        "urgency": ["hurry", "quickly", "immediately", "right now", "fast", "asap", "urgent", "don't wait", "dont wait", "time is running", "limited time"],
         "threat": ["police", "arrest", "legal action", "court", "jail", "case", "fraud", "crime", "investigation", "serious", "consequences"],
-        "fear": ["account blocked", "account suspended", "lose money", "stolen", "hack", "security breach", "compromised", "danger"],
+        "fear": ["account blocked", "account suspended", "account will be blocked", "lose money", "stolen", "hack", "security breach", "compromised", "danger", "24 hours", "24hrs", "locked", "freeze"],
         "authority": ["government", "official", "regulatory", "compliance", "mandatory", "required", "must", "have to"],
-        "isolation": ["don't tell anyone", "keep secret", "confidential", "only you", "private", "nobody else"],
-        "aggression": ["listen to me", "do as i say", "you must", "don't argue", "just do it", "stop asking", "follow instructions"]
+        "isolation": ["don't tell anyone", "dont tell anyone", "keep secret", "confidential", "only you", "private", "nobody else", "don't tell", "dont tell"],
+        "aggression": ["listen to me", "do as i say", "you must", "don't argue", "dont argue", "just do it", "stop asking", "follow instructions"]
     }
     
     detected_pressures = []
@@ -320,7 +320,105 @@ def generate_reply(
             "pressure_type": pressure_type if is_pressure else None
         })
     
+    # If pressure detected, send a clear safe-exit message that ends engagement
+    if is_pressure:
+        reply = get_pressure_exit_reply(persona, pressure_type)
+        logger.info("Pressure detected — sending safe exit, no more engagement", extra={
+            "pressure_type": pressure_type,
+            "persona": persona.name
+        })
+        return reply, persona.persona_type.value, scanned_intelligence, True
+    
     return reply, persona.persona_type.value, scanned_intelligence, should_exit
+
+
+def get_pressure_exit_reply(persona, pressure_type: str = "") -> str:
+    """
+    Generate a safe exit message when the scammer applies pressure.
+    The reply clearly ends engagement without being confrontational.
+    """
+    import random
+    
+    # Pressure-type-aware exit responses that naturally end the conversation
+    exit_replies = {
+        "urgency": [
+            "okay okay, slow down. i'll handle this through the bank app myself, thanks.",
+            "no no, don't rush me. i'll deal with this on my own time.",
+            "i need to take a breath here. i'll call the bank directly."
+        ],
+        "threat": [
+            "whoa, that's a bit aggressive. i'm going to talk to my husband about this first.",
+            "i don't respond well to threats. i'll be contacting the authorities myself.",
+            "i'm going to end this call and verify things on my own."
+        ],
+        "fear": [
+            "i really shouldn't be giving info over a call like this. i'll go to the branch myself.",
+            "this is making me uncomfortable. i'll handle it at the actual bank.",
+            "i think i should hang up and call the official number instead."
+        ],
+        "authority": [
+            "i'll verify this through official channels myself. good day.",
+            "if this is urgent, i'll reach out through proper channels. busy right now.",
+            "i prefer dealing with these things face to face. i'll drop by the branch."
+        ],
+        "isolation": [
+            "why should i keep it a secret? that makes me uneasy. i'll mention it to my family.",
+            "i don't like being told to keep things secret. i'll talk to my son about this.",
+            "secret? no thanks, i'll let my family know about this first."
+        ],
+        "aggression": [
+            "i don't appreciate being spoken to like that. i'm done here.",
+            "this conversation is over. i'll report this.",
+            "no, i'm not going to do that. i'm ending this."
+        ]
+    }
+    
+    # If specific pressure type known, use related exits; else generic
+    if pressure_type in exit_replies:
+        return random.choice(exit_replies[pressure_type])
+    
+    # Generic safe exits based on persona
+    generic_exits = {
+        "Confused User": [
+            "this is getting too complicated. i'll ask my son to help me deal with it.",
+            "i think i should stop and talk to someone first. thanks anyway."
+        ],
+        "Busy Professional": [
+            "look, i've got to go. i'll handle this through the bank's official line.",
+            "i'm done here, i'll deal with this at the branch myself."
+        ],
+        "Curious Student": [
+            "hmm, i think i'd rather check about this properly first. thanks for the info though.",
+            "i should probably ask my professor about this. i'll get back to you."
+        ],
+        "Over-Polite User": [
+            "oh i'm so sorry, but i really must go now! thank you, bye!",
+            "i thank you for calling but i'll handle this with the bank directly. so sorry!"
+        ],
+        "Paranoid User": [
+            "yeah, i knew something was off. i'm not comfortable with this anymore.",
+            "no thanks, i'll verify things myself. i don't trust this."
+        ],
+        "Tech-Savvy Skeptic": [
+            "this doesn't sit right. i'll verify through official channels.",
+            "yeah, i'll look into this. i'll use the official app only."
+        ],
+        "Nervous Elder": [
+            "oh dear, i really need to speak to my son first. i'll call you back.",
+            "this is all too fast for me. i'll visit the branch myself, thank you."
+        ]
+    }
+    
+    # First try persona-specific
+    if persona.name in generic_exits:
+        exit_list = generic_exits[persona.name]
+    else:
+        exit_list = [
+            "i think i need to stop here and handle this properly. good day.",
+            "i'll take care of this through official channels. thanks."
+        ]
+    
+    return random.choice(exit_list)
 
 
 def get_fallback_response(persona, mode: str, is_pressure: bool = False) -> str:

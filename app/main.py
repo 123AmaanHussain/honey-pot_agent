@@ -879,19 +879,32 @@ async def handle_message(
     # -------------------------
     def should_exit() -> tuple[bool, str]:
         """Determine if agent should exit conversation."""
-        # Exit condition 1: Confidence threshold reached (False positive / Safe user)
+        # Exit condition 1: Pressure detected — immediate safe exit, no more engagement
+        if detection.get("escalation", {}).get("is_escalating", False):
+            return True, "pressure_detected"
+        
+        # Exit condition 2: Enough intelligence extracted — safe exit with gathered intel
+        extracted = session.extracted
+        intel_count = (
+            len(extracted.upiIds or []) +
+            len(extracted.phoneNumbers or []) +
+            len(extracted.phishingLinks or []) +
+            len(extracted.bankAccounts or []) +
+            len(extracted.scannedText or [])
+        )
+        # Exit if we have 2+ pieces of intelligence (UPI + phone, or link + bank, etc.)
+        if intel_count >= 2:
+            return True, "intelligence_extracted"
+        
+        # Exit condition 3: Confidence threshold reached (False positive / Safe user)
         if session.confidence <= settings.exit_confidence_threshold:
             return True, "confidence_threshold"
-        
-        # Exit condition 2: Escalation detected (Agent performs safe exit to avoid harassment)
-        if detection.get("escalation", {}).get("is_escalating", False):
-            return True, "escalation_detected"
             
         # Hard safety limit to prevent absolute infinite loops with other bots
         if session.turns >= 50:
             return True, "max_turns_reached"
         
-        # Otherwise, stay engaged indefinitely to extract max intelligence
+        # Otherwise, stay engaged to extract more intelligence
         return False, None
     
     exit_needed, exit_reason = should_exit()
