@@ -16,7 +16,10 @@ export default function Sidebar() {
     { href: '/intelligence', label: 'Intel Hub', icon: '🧠' },
     { href: '/sessions', label: 'Session Logs', icon: '📊' },
     { href: '/simulator', label: 'Simulator', icon: '🎮' },
+    { href: '/map', label: 'Threat Map', icon: '🌐' },
+    { href: '/telemetry', label: 'Prometheus · Grafana', icon: '📡' },
   ];
+
 
   return (
     <aside className={styles.sidebar}>

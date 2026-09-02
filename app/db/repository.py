@@ -332,3 +332,30 @@ def get_messages(session_id: str) -> List[Dict]:
     except Exception as e:
         logger.error(f"get_messages failed for {session_id}: {e}")
         return []
+
+
+def delete_session(session_id: str) -> bool:
+    """
+    Permanently remove a session and all its related rows
+    (intelligence + message transcripts) from the database.
+
+    Args:
+        session_id: Session to delete
+
+    Returns:
+        True on success, False if DB unavailable or error
+    """
+    if not is_connected():
+        return False
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM intelligence WHERE session_id = %s", (session_id,))
+                cur.execute("DELETE FROM messages WHERE session_id = %s", (session_id,))
+                cur.execute("DELETE FROM sessions WHERE id = %s", (session_id,))
+        logger.info(f"Deleted session from DB: {session_id}")
+        return True
+    except Exception as e:
+        logger.error(f"delete_session failed for {session_id}: {e}")
+        return False

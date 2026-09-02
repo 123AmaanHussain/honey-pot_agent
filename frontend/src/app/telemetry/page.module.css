@@ -1,0 +1,191 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.headerLeft { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.headerRight { display: flex; align-items: flex-start; padding-top: 0.2rem; }
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  border-radius: 6px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #00ff88;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.statusDot {
+  width: 8px; height: 8px;
+  background: #00ff88;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.7);
+  animation: pulse 1.4s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* ─── Loading ─────────────────────────────────────────────────────── */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 5rem;
+  color: #8b949e;
+  font-size: 0.85rem;
+}
+
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid rgba(244, 104, 0, 0.2);
+  border-top-color: #F46800;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Section ─────────────────────────────────────────────────────── */
+.section { width: 100%; }
+
+/* ─── Prometheus Setup Card ──────────────────────────────────────── */
+.promSetupCard {
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid rgba(244, 104, 0, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.promSetupCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #F46800, transparent);
+  opacity: 0.6;
+}
+
+.promTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #F46800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.grafanaTitle {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(45, 53, 66, 0.6);
+}
+
+.promDesc {
+  font-size: 0.78rem;
+  color: #8b949e;
+  line-height: 1.6;
+}
+
+.promConfig {
+  background: rgba(5, 8, 10, 0.9);
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: #00ff88;
+  white-space: pre;
+  overflow-x: auto;
+  line-height: 1.8;
+}
+
+/* ─── Metrics List ───────────────────────────────────────────────── */
+.metricsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.metricRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 7px;
+  background: rgba(5, 8, 10, 0.6);
+  border: 1px solid rgba(45, 53, 66, 0.5);
+  transition: border-color 0.2s;
+}
+
+.metricRow:hover {
+  border-color: rgba(244, 104, 0, 0.25);
+}
+
+.metricName {
+  font-family: 'Courier New', monospace;
+  font-size: 0.68rem;
+  color: #00ff88;
+  font-weight: 600;
+}
+
+.metricDesc {
+  font-size: 0.72rem;
+  color: #8b949e;
+}
+
+.metricType {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: 4px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+}
+
+.type_gauge   { background: rgba(0, 212, 255, 0.12); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.3); }
+.type_counter { background: rgba(165, 94, 234, 0.12); color: #a55eea; border: 1px solid rgba(165, 94, 234, 0.3); }

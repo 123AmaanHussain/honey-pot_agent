@@ -2,14 +2,18 @@
 
 import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
-import { getSession } from '../../../lib/api';
+import { getSession, completeSession, deleteSession } from '../../../lib/api';
 
 export default function SessionDetail({ params }) {
   const unwrappedParams = use(params);
   const sessionId = unwrappedParams.id;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     getSession(sessionId).then((res) => {
@@ -17,6 +21,31 @@ export default function SessionDetail({ params }) {
       setLoading(false);
     });
   }, [sessionId]);
+
+  const handleComplete = async () => {
+    if (!window.confirm(`End session "${sessionId}"? Intelligence will be saved to the Intel Hub.`)) return;
+    setBusy(true);
+    const res = await completeSession(sessionId);
+    if (res && res.error) {
+      setNotice(`⚠️ ${res.error}`);
+      setBusy(false);
+    } else {
+      setNotice('✅ Session ended · Intelligence saved to Intel Hub.');
+      setBusy(false);
+      const refreshed = await getSession(sessionId);
+      if (refreshed && !refreshed.error) setData(refreshed);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Permanently delete session "${sessionId}" and its logs?`)) return;
+    const res = await deleteSession(sessionId);
+    if (res && res.error) {
+      setNotice(`⚠️ ${res.error}`);
+    } else {
+      router.push('/sessions');
+    }
+  };
 
   if (loading) return <div className={styles.header}>Loading Session {sessionId}...</div>;
   if (!data) return <div className={styles.header}>Error loading session. It may not exist.</div>;
@@ -33,10 +62,34 @@ export default function SessionDetail({ params }) {
           <h1 className={styles.title}>Session Details</h1>
           <div className={styles.sessionId}>{sessionId}</div>
         </div>
-        <div className={`badge ${confPercent > 40 ? 'scam' : 'safe'}`}>
-          {confPercent}% Scam Confidence
+        <div className={styles.headerRight}>
+          <div className={`badge ${confPercent > 40 ? 'scam' : 'safe'}`}>
+            {confPercent}% Scam Confidence
+          </div>
+          <div className={styles.actions}>
+            {!session.completed && (
+              <button
+                className={`${styles.actionBtn} ${styles.endBtn}`}
+                onClick={handleComplete}
+                disabled={busy}
+                title="End session and save intelligence to Intel Hub"
+              >
+                {busy ? 'Ending…' : '✅ End Session'}
+              </button>
+            )}
+            <button
+              className={`${styles.actionBtn} ${styles.deleteBtn}`}
+              onClick={handleDelete}
+              disabled={busy}
+              title="Delete this session log"
+            >
+              🗑️ Delete Session
+            </button>
+          </div>
         </div>
       </div>
+
+      {notice && <div className={styles.notice}>{notice}</div>}
 
       <div className={styles.content}>
         {/* Chat Transcript */}

@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from typing import Dict
 
 from fastapi import FastAPI, Header, HTTPException, Request, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from logging.handlers import RotatingFileHandler
@@ -28,7 +28,7 @@ from app.middleware import (
     RequestIDMiddleware, RequestLoggingMiddleware,
     SecurityHeadersMiddleware, RateLimitMiddleware
 )
-from app.core.detection import detect_scam, update_confidence
+from app.core.detection import detect_scam, detect_scam_llm, update_confidence
 from app.core.agent import generate_reply, generate_exit_message, profile_scammer
 from app.callback import send_final_callback
 from app.core.extraction import extract_all_intelligence, merge_intelligence
@@ -395,6 +395,124 @@ async def get_metrics():
     )
 
 
+@app.get("/metrics/prometheus", tags=["Monitoring"])
+async def get_prometheus_metrics():
+    """
+    Expose application metrics in Prometheus text exposition format.
+    Can be scraped directly by Prometheus or viewed in the ops dashboard.
+    """
+    total_sessions = len(SESSIONS)
+    active_sessions = sum(1 for s in SESSIONS.values() if not s.completed)
+    completed_sessions = sum(1 for s in SESSIONS.values() if s.completed)
+    total_messages = sum(s.turns for s in SESSIONS.values())
+    scams_detected = sum(1 for s in SESSIONS.values() if s.confidence < 0.5)
+    avg_confidence = (sum(s.confidence for s in SESSIONS.values()) / len(SESSIONS)) if SESSIONS else 0.0
+    uptime_seconds = int(time.time() - app_start_time)
+
+    metrics_text = "\n".join([
+        "# HELP honeypot_total_sessions Total number of sessions tracked",
+        "# TYPE honeypot_total_sessions gauge",
+        f"honeypot_total_sessions {total_sessions}",
+        "# HELP honeypot_active_sessions Currently active (in-progress) sessions",
+        "# TYPE honeypot_active_sessions gauge",
+        f"honeypot_active_sessions {active_sessions}",
+        "# HELP honeypot_completed_sessions Sessions marked complete",
+        "# TYPE honeypot_completed_sessions gauge",
+        f"honeypot_completed_sessions {completed_sessions}",
+        "# HELP honeypot_messages_total Total messages exchanged across sessions",
+        "# TYPE honeypot_messages_total counter",
+        f"honeypot_messages_total {total_messages}",
+        "# HELP honeypot_scams_detected_total Scam conversations detected",
+        "# TYPE honeypot_scams_detected_total counter",
+        f"honeypot_scams_detected_total {scams_detected}",
+        "# HELP honeypot_avg_confidence Average scam confidence (0-1)",
+        "# TYPE honeypot_avg_confidence gauge",
+        f"honeypot_avg_confidence {round(avg_confidence, 4)}",
+        "# HELP honeypot_uptime_seconds Server uptime in seconds",
+        "# TYPE honeypot_uptime_seconds gauge",
+        f"honeypot_uptime_seconds {uptime_seconds}",
+    ])
+
+    return Response(
+        content=metrics_text,
+        media_type="text/plain; version=0.0.4; charset=utf-8"
+    )
+
+
+# -------------------------
+# Geo Analytics Endpoint
+# -------------------------
+
+# Phone country-code -> (country code, country name) map for geo aggregation.
+# Pairs with the frontend WorldThreatMap country positions table.
+COUNTRY_PREFIXES = {
+    "977": ("NP", "Nepal"), "880": ("BD", "Bangladesh"), "234": ("NG", "Nigeria"),
+    "212": ("MA", "Morocco"), "254": ("KE", "Kenya"), "963": ("SY", "Syria"),
+    "233": ("GH", "Ghana"), "91": ("IN", "India"), "92": ("PK", "Pakistan"),
+    "94": ("LK", "Sri Lanka"), "55": ("BR", "Brazil"), "52": ("MX", "Mexico"),
+    "63": ("PH", "Philippines"), "84": ("VN", "Vietnam"), "62": ("ID", "Indonesia"),
+    "90": ("TR", "Turkey"), "27": ("ZA", "South Africa"), "20": ("EG", "Egypt"),
+    "49": ("DE", "Germany"), "33": ("FR", "France"), "39": ("IT", "Italy"),
+    "44": ("GB", "United Kingdom"), "34": ("ES", "Spain"), "48": ("PL", "Poland"),
+    "86": ("CN", "China"), "81": ("JP", "Japan"), "82": ("KR", "South Korea"),
+    "66": ("TH", "Thailand"), "60": ("MY", "Malaysia"), "65": ("SG", "Singapore"),
+    "61": ("AU", "Australia"), "1": ("US", "United States"), "7": ("RU", "Russia"),
+}
+
+
+def _resolve_country(phone: str):
+    """Return (country_code, country_name) for a phone number, defaulting to India."""
+    digits = "".join(ch for ch in phone if ch.isdigit())
+    for prefix_len in (3, 2, 1):
+        prefix = digits[:prefix_len]
+        if prefix in COUNTRY_PREFIXES:
+            return COUNTRY_PREFIXES[prefix]
+    return ("IN", "India")
+
+
+@app.get("/analytics/geo", tags=["Analytics"])
+async def get_geo_analytics():
+    """
+    Country-level threat distribution derived from phone numbers
+    extracted across all honeypot sessions.
+    """
+    distribution = {}
+    total_messages = sum(s.turns for s in SESSIONS.values())
+    total_scams = sum(1 for s in SESSIONS.values() if s.confidence < 0.5)
+
+    for session in SESSIONS.values():
+        phones = session.extracted.phoneNumbers or []
+        countries = {_resolve_country(p) for p in phones}
+        if not countries:
+            continue
+        is_scam = session.confidence < 0.5
+        for code, country in countries:
+            entry = distribution.setdefault(
+                code,
+                {"code": code, "country": country, "messages": 0, "scams": 0},
+            )
+            entry["messages"] += session.turns
+            if is_scam:
+                entry["scams"] += 1
+
+    for entry in distribution.values():
+        ratio = entry["scams"] / entry["messages"] if entry["messages"] else 0
+        if ratio >= 0.75:
+            entry["risk"] = "critical"
+        elif ratio >= 0.5:
+            entry["risk"] = "high"
+        elif ratio >= 0.25:
+            entry["risk"] = "medium"
+        else:
+            entry["risk"] = "low"
+
+    return {
+        "distribution": list(distribution.values()),
+        "total_messages": total_messages,
+        "total_scams": total_scams,
+    }
+
+
 # -------------------------
 # Intelligence Aggregation Endpoint
 # -------------------------
@@ -592,8 +710,16 @@ async def handle_message(
         message_obj = body_json.get("message", {})
         if isinstance(message_obj, dict):
             message_text = message_obj.get("text", "")
+            # Extract sender information if available
+            sender_info = {
+                'sender_email': message_obj.get("sender_email"),
+                'sender_phone': message_obj.get("sender_phone"),
+                'sender_profile': message_obj.get("sender_profile"),
+                'sender_name': message_obj.get("sender_name")
+            }
         else:
             message_text = str(message_obj)
+            sender_info = {}
         
         # Validate we have minimum required data
         if not message_text or not message_text.strip():
@@ -642,12 +768,12 @@ async def handle_message(
         session.message_history = session.message_history[-10:]
     
     # -------------------------
-    # Enhanced Scam Detection
+    # Enhanced Scam Detection (LLM-only with sender context)
     # -------------------------
-    detection = detect_scam(
+    detection = detect_scam_llm(
         message_text,
         message_history=session.message_history[:-1],  # Exclude current message
-        behavior_patterns=session.behavior_patterns
+        sender_info=sender_info
     )
     
     # -------------------------
@@ -959,6 +1085,92 @@ async def get_session(
         data=SESSIONS[session_id],
         messages=messages
     )
+
+
+# -------------------------
+# Session Lifecycle (manual end / delete)
+# -------------------------
+
+@app.post("/sessions/{session_id}/complete", tags=["Admin"])
+async def complete_session(
+    session_id: str,
+    api_key: str = Depends(verify_api_key)
+):
+    """
+    Manually end a session. Finalizes the conversation, persists the extracted
+    intelligence (which flows into the Intel Hub aggregation) and fires the
+    completion callback + webhook. Idempotent: completing twice is a no-op.
+    """
+    if session_id not in SESSIONS:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session = SESSIONS[session_id]
+    if not session.completed:
+        session.completed = True
+        session.update_activity()
+
+        send_final_callback(session_id, session.dict())
+        EventManager.notify_session_completed(session_id, session.dict())
+
+        # Persist finalized state + intelligence
+        db_repo.upsert_session(session_id, session.dict())
+        db_repo.upsert_intelligence(session_id, session.extracted.dict())
+        logger.info(f"Session manually completed: {session_id}")
+
+    return {
+        "status": "success",
+        "session_id": session_id,
+        "completed": session.completed,
+        "intelligence_saved": len(session.extracted.dict()) > 0,
+    }
+
+
+@app.delete("/sessions/completed", tags=["Admin"])
+async def delete_completed_sessions(api_key: str = Depends(verify_api_key)):
+    """
+    Delete all completed sessions (logs + intelligence + messages).
+    """
+    deleted = []
+    for session_id in list(SESSIONS.keys()):
+        if SESSIONS[session_id].completed:
+            deleted.append(session_id)
+            del SESSIONS[session_id]
+            db_repo.delete_session(session_id)
+
+    logger.info(f"Deleted {len(deleted)} completed sessions: {deleted}")
+    return {"status": "success", "deleted": len(deleted), "session_ids": deleted}
+
+
+@app.delete("/sessions", tags=["Admin"])
+async def delete_all_sessions(api_key: str = Depends(verify_api_key)):
+    """
+    Delete every session log (logs + intelligence + messages).
+    """
+    deleted = list(SESSIONS.keys())
+    SESSIONS.clear()
+    for session_id in deleted:
+        db_repo.delete_session(session_id)
+
+    logger.info(f"Deleted all sessions ({len(deleted)} total)")
+    return {"status": "success", "deleted": len(deleted)}
+
+
+@app.delete("/sessions/{session_id}", tags=["Admin"])
+async def delete_session(
+    session_id: str,
+    api_key: str = Depends(verify_api_key)
+):
+    """
+    Delete a single session log (logs + intelligence + messages).
+    """
+    if session_id not in SESSIONS:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    del SESSIONS[session_id]
+    db_repo.delete_session(session_id)
+    logger.info(f"Deleted session: {session_id}")
+
+    return {"status": "success", "deleted": 1, "session_id": session_id}
 
 
 # -------------------------

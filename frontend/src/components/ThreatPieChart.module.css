@@ -1,0 +1,243 @@
+.card {
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00ff88, #00d4ff, transparent);
+  opacity: 0.6;
+}
+
+.card:hover {
+  border-color: rgba(0, 255, 136, 0.4);
+  box-shadow: 0 0 24px rgba(0, 255, 136, 0.1);
+}
+
+/* ─── Header ─────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e0e6ed;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.titleIcon {
+  font-size: 1.1rem;
+}
+
+/* ─── Tabs ───────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0.35rem;
+  background: rgba(5, 8, 10, 0.6);
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #e0e6ed;
+  background: rgba(0, 255, 136, 0.08);
+}
+
+.tabActive {
+  background: rgba(0, 255, 136, 0.15) !important;
+  color: #00ff88 !important;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+}
+
+/* ─── Body ───────────────────────────────────────────────────────── */
+.body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Chart ──────────────────────────────────────────────────────── */
+.chartArea {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.centerText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.centerValue {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #00ff88;
+  text-shadow: 0 0 16px rgba(0, 255, 136, 0.6);
+  line-height: 1;
+}
+
+.centerLabel {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #8b949e;
+  margin-top: 4px;
+}
+
+/* ─── Tooltip ────────────────────────────────────────────────────── */
+.tooltip {
+  background: rgba(10, 14, 20, 0.95);
+  border: 1px solid rgba(45, 53, 66, 0.9);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-family: 'Courier New', monospace;
+  min-width: 160px;
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #e0e6ed;
+  border-bottom: 1px solid;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.tooltipBody {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.tooltipValue {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.tooltipLabel {
+  font-size: 0.65rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Legend ─────────────────────────────────────────────────────── */
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.legendItem {
+  display: grid;
+  grid-template-columns: 10px 1fr auto auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.legendItem:hover,
+.legendActive {
+  background: rgba(0, 255, 136, 0.05);
+  border-color: rgba(0, 255, 136, 0.15);
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendName {
+  font-size: 0.72rem;
+  color: #8b949e;
+  transition: color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legendItem:hover .legendName,
+.legendActive .legendName {
+  color: #e0e6ed;
+}
+
+.legendBar {
+  width: 60px;
+  height: 4px;
+  background: rgba(45, 53, 66, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.legendFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.legendPct {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  min-width: 30px;
+  text-align: right;
+}

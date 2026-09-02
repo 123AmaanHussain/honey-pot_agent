@@ -1015,6 +1015,194 @@ async def get_whatsapp_output(
 
 
 # -------------------------
+# Prometheus Metrics Exposition
+# -------------------------
+
+@app.get("/metrics/prometheus", tags=["Monitoring"], response_class=None)
+async def prometheus_metrics():
+    """
+    Prometheus-compatible text format metrics endpoint.
+    Scrape this from Prometheus with: job_name: honeypot
+    """
+    from fastapi.responses import PlainTextResponse
+    
+    total_sessions = len(SESSIONS)
+    active_sessions = sum(1 for s in SESSIONS.values() if not s.completed)
+    completed_sessions = sum(1 for s in SESSIONS.values() if s.completed)
+    total_messages = sum(s.turns for s in SESSIONS.values())
+    scams_detected = sum(1 for s in SESSIONS.values() if s.confidence < 0.5)
+    
+    avg_confidence = 0.0
+    if SESSIONS:
+        avg_confidence = sum(s.confidence for s in SESSIONS.values()) / len(SESSIONS)
+    
+    uptime = int(time.time() - app_start_time)
+    
+    # Aggregate IOC counts
+    all_upi = set()
+    all_phones = set()
+    all_links = set()
+    all_banks = set()
+    for s in SESSIONS.values():
+        all_upi.update(s.extracted.upiIds)
+        all_phones.update(s.extracted.phoneNumbers)
+        all_links.update(s.extracted.phishingLinks)
+        all_banks.update(s.extracted.bankAccounts)
+    
+    lines = []
+    lines.append("# HELP honeypot_total_sessions Total honeypot sessions created")
+    lines.append("# TYPE honeypot_total_sessions gauge")
+    lines.append(f"honeypot_total_sessions {total_sessions}")
+    
+    lines.append("# HELP honeypot_active_sessions Currently active (non-completed) sessions")
+    lines.append("# TYPE honeypot_active_sessions gauge")
+    lines.append(f"honeypot_active_sessions {active_sessions}")
+    
+    lines.append("# HELP honeypot_completed_sessions Total completed sessions")
+    lines.append("# TYPE honeypot_completed_sessions counter")
+    lines.append(f"honeypot_completed_sessions {completed_sessions}")
+    
+    lines.append("# HELP honeypot_scams_detected_total Total scam sessions confirmed")
+    lines.append("# TYPE honeypot_scams_detected_total counter")
+    lines.append(f"honeypot_scams_detected_total {scams_detected}")
+    
+    lines.append("# HELP honeypot_messages_total Total messages processed across all sessions")
+    lines.append("# TYPE honeypot_messages_total counter")
+    lines.append(f"honeypot_messages_total {total_messages}")
+    
+    lines.append("# HELP honeypot_avg_confidence Average scam confidence score (0=certain scam, 1=benign)")
+    lines.append("# TYPE honeypot_avg_confidence gauge")
+    lines.append(f"honeypot_avg_confidence {round(avg_confidence, 4)}")
+    
+    lines.append("# HELP honeypot_uptime_seconds Application uptime in seconds")
+    lines.append("# TYPE honeypot_uptime_seconds counter")
+    lines.append(f"honeypot_uptime_seconds {uptime}")
+    
+    lines.append("# HELP honeypot_extracted_upi_total Unique UPI IDs extracted")
+    lines.append("# TYPE honeypot_extracted_upi_total gauge")
+    lines.append(f"honeypot_extracted_upi_total {len(all_upi)}")
+    
+    lines.append("# HELP honeypot_extracted_phones_total Unique phone numbers extracted")
+    lines.append("# TYPE honeypot_extracted_phones_total gauge")
+    lines.append(f"honeypot_extracted_phones_total {len(all_phones)}")
+    
+    lines.append("# HELP honeypot_extracted_links_total Unique phishing links extracted")
+    lines.append("# TYPE honeypot_extracted_links_total gauge")
+    lines.append(f"honeypot_extracted_links_total {len(all_links)}")
+    
+    lines.append("# HELP honeypot_extracted_bank_accounts_total Unique bank accounts extracted")
+    lines.append("# TYPE honeypot_extracted_bank_accounts_total gauge")
+    lines.append(f"honeypot_extracted_bank_accounts_total {len(all_banks)}")
+    
+    # Scammer type breakdown
+    from collections import Counter
+    scammer_types = Counter(
+        s.scammer_type for s in SESSIONS.values() if s.scammer_type
+    )
+    lines.append("# HELP honeypot_sessions_by_type Sessions grouped by scammer type")
+    lines.append("# TYPE honeypot_sessions_by_type gauge")
+    for stype, count in scammer_types.items():
+        safe_type = str(stype).replace('"', "'").replace(" ", "_").lower()
+        lines.append(f'honeypot_sessions_by_type{{scammer_type="{safe_type}"}} {count}')
+    
+    lines.append("")
+    output = "\n".join(lines)
+    return PlainTextResponse(content=output, media_type="text/plain; version=0.0.4; charset=utf-8")
+
+
+# -------------------------
+# Geo Analytics Endpoint
+# -------------------------
+
+# Simulated phone-prefix to country mapping for demo
+PHONE_PREFIX_COUNTRY = {
+    "+91": ("India", "IN"), "+234": ("Nigeria", "NG"), "+7": ("Russia", "RU"),
+    "+1": ("United States", "US"), "+55": ("Brazil", "BR"), "+63": ("Philippines", "PH"),
+    "+84": ("Vietnam", "VN"), "+62": ("Indonesia", "ID"), "+44": ("United Kingdom", "GB"),
+    "+86": ("China", "CN"), "+27": ("South Africa", "ZA"), "+880": ("Bangladesh", "BD"),
+    "+92": ("Pakistan", "PK"), "+233": ("Ghana", "GH"), "+49": ("Germany", "DE"),
+    "+254": ("Kenya", "KE"), "+60": ("Malaysia", "MY"), "+66": ("Thailand", "TH"),
+}
+
+# Fallback demo distribution when no real phone data is available
+DEMO_GEO = [
+    {"country": "India", "code": "IN", "messages": 47, "scams": 42, "risk": "critical"},
+    {"country": "Nigeria", "code": "NG", "messages": 31, "scams": 29, "risk": "critical"},
+    {"country": "Russia", "code": "RU", "messages": 18, "scams": 15, "risk": "high"},
+    {"country": "United States", "code": "US", "messages": 12, "scams": 8, "risk": "high"},
+    {"country": "Brazil", "code": "BR", "messages": 9, "scams": 7, "risk": "medium"},
+    {"country": "Philippines", "code": "PH", "messages": 8, "scams": 7, "risk": "medium"},
+    {"country": "Vietnam", "code": "VN", "messages": 6, "scams": 5, "risk": "medium"},
+    {"country": "Indonesia", "code": "ID", "messages": 5, "scams": 4, "risk": "medium"},
+    {"country": "United Kingdom", "code": "GB", "messages": 4, "scams": 2, "risk": "low"},
+    {"country": "Ghana", "code": "GH", "messages": 4, "scams": 3, "risk": "medium"},
+    {"country": "Pakistan", "code": "PK", "messages": 3, "scams": 2, "risk": "low"},
+    {"country": "Bangladesh", "code": "BD", "messages": 3, "scams": 2, "risk": "low"},
+    {"country": "China", "code": "CN", "messages": 3, "scams": 2, "risk": "low"},
+    {"country": "South Africa", "code": "ZA", "messages": 2, "scams": 1, "risk": "low"},
+    {"country": "Kenya", "code": "KE", "messages": 2, "scams": 1, "risk": "low"},
+]
+
+@app.get("/analytics/geo", tags=["Analytics"])
+async def get_geo_analytics():
+    """
+    Returns per-country message and scam distribution derived from
+    extracted phone number prefixes, with demo data when corpus is sparse.
+    """
+    from collections import defaultdict, Counter
+    
+    country_msgs = defaultdict(int)
+    country_scams = defaultdict(int)
+    
+    for session_id, session in SESSIONS.items():
+        is_scam = session.confidence < 0.5
+        matched = False
+        for phone in session.extracted.phoneNumbers:
+            for prefix, (country, code) in PHONE_PREFIX_COUNTRY.items():
+                if phone.startswith(prefix):
+                    country_msgs[(country, code)] += session.turns or 1
+                    if is_scam:
+                        country_scams[(country, code)] += 1
+                    matched = True
+                    break
+    
+    # Build result list
+    result = []
+    for (country, code), msg_count in sorted(country_msgs.items(), key=lambda x: -x[1]):
+        scam_count = country_scams.get((country, code), 0)
+        msg_count_val = msg_count
+        ratio = scam_count / max(msg_count_val, 1)
+        risk = "critical" if ratio > 0.8 else "high" if ratio > 0.6 else "medium" if ratio > 0.3 else "low"
+        result.append({
+            "country": country,
+            "code": code,
+            "messages": msg_count_val,
+            "scams": scam_count,
+            "risk": risk,
+        })
+    
+    # Use demo data if real data is sparse
+    if sum(r["messages"] for r in result) < 5:
+        # Blend real data with demo data
+        demo_used = {d["code"]: d for d in DEMO_GEO}
+        for r in result:
+            if r["code"] in demo_used:
+                demo_used[r["code"]]["messages"] += r["messages"]
+                demo_used[r["code"]]["scams"] += r["scams"]
+        result = sorted(demo_used.values(), key=lambda x: -x["messages"])
+    
+    total_messages = sum(r["messages"] for r in result)
+    total_scams = sum(r["scams"] for r in result)
+    
+    return {
+        "total_messages": total_messages,
+        "total_scams": total_scams,
+        "countries": len(result),
+        "distribution": result,
+    }
+
+
+# -------------------------
 # Root Endpoint
 # -------------------------
 

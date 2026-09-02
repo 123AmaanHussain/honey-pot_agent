@@ -503,3 +503,136 @@
     flex: 1;
   }
 }
+
+/* ─── Page wrapper ────────────────────────────────────────────────── */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1.5rem;
+}
+
+/* ─── Grafana Quick Widget ────────────────────────────────────────── */
+.grafanaWidget {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid rgba(244, 104, 0, 0.25);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.grafanaWidget::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #F46800, transparent);
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .grafanaWidget { grid-template-columns: 1fr; }
+}
+
+.grafanaWidgetLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.grafanaLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #F46800;
+  text-shadow: 0 0 10px rgba(244, 104, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.grafanaDesc {
+  font-size: 0.75rem;
+  color: #8b949e;
+  line-height: 1.6;
+}
+
+.grafanaWidgetRight {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.promMetrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: rgba(5, 8, 10, 0.8);
+  border: 1px solid rgba(45, 53, 66, 0.7);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.promMetric {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Courier New', monospace;
+  font-size: 0.68rem;
+}
+
+.promMetric code {
+  color: #6e7681;
+}
+
+.grafanaLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(244, 104, 0, 0.12);
+  border: 1px solid rgba(244, 104, 0, 0.35);
+  color: #F46800;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.grafanaLink:hover {
+  background: rgba(244, 104, 0, 0.22);
+  box-shadow: 0 0 16px rgba(244, 104, 0, 0.25);
+  color: #F46800;
+}
+
+/* ─── Section footer link ─────────────────────────────────────────── */
+.sectionFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.viewFullLink {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-cyan);
+  font-family: 'Courier New', monospace;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+
+.viewFullLink:hover {
+  color: var(--color-green);
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+}

@@ -39,21 +39,69 @@ export async function listSessions() {
   return fetchWithAuth('/sessions');
 }
 
-export async function sendMessage(sessionId, text) {
+export async function completeSession(sessionId) {
   try {
+    const res = await fetch(`${API_URL}/sessions/${sessionId}/complete`, {
+      method: 'POST',
+      headers: {
+        'x-api-key': API_KEY,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    return await res.json();
+  } catch (error) {
+    console.error('Error completing session:', error);
+    return { error: error.message };
+  }
+}
+
+export async function deleteSession(sessionId) {
+  try {
+    const res = await fetch(`${API_URL}/sessions/${sessionId}`, {
+      method: 'DELETE',
+      headers: { 'x-api-key': API_KEY },
+    });
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    return await res.json();
+  } catch (error) {
+    console.error('Error deleting session:', error);
+    return { error: error.message };
+  }
+}
+
+export async function deleteCompletedSessions() {
+  try {
+    const res = await fetch(`${API_URL}/sessions/completed`, {
+      method: 'DELETE',
+      headers: { 'x-api-key': API_KEY },
+    });
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    return await res.json();
+  } catch (error) {
+    console.error('Error deleting completed sessions:', error);
+    return { error: error.message };
+  }
+}
+
+export async function sendMessage(sessionId, text, senderInfo = {}) {
+  try {
+    const messageBody = {
+      sessionId,
+      message: {
+        sender: 'scammer',
+        text,
+        ...senderInfo
+      }
+    };
+    
     const res = await fetch(`${API_URL}/honeypot/message`, {
       method: 'POST',
       headers: {
         'x-api-key': API_KEY,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        sessionId,
-        message: {
-          sender: 'scammer',
-          text
-        }
-      })
+      body: JSON.stringify(messageBody)
     });
     
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
@@ -336,4 +384,51 @@ export async function getEmailOutput(lines = 20) {
     console.error('Error getting email output:', error);
     return { error: error.message };
   }
+}
+
+// Analytics & Telemetry
+export async function getGeoAnalytics() {
+  try {
+    const res = await fetch(`${API_URL}/analytics/geo`, {
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching geo analytics:', error);
+    return null;
+  }
+}
+
+export async function getPrometheusMetrics() {
+  try {
+    const res = await fetch(`${API_URL}/metrics/prometheus`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    return await res.text();
+  } catch (error) {
+    console.error('Error fetching prometheus metrics:', error);
+    return null;
+  }
+}
+
+// Generate synthetic timeseries data for sparklines (real endpoint can replace this later)
+export async function getTimeseriesMetrics() {
+  const now = Date.now();
+  const points = 20;
+  const series = [];
+  let base = 0;
+  for (let i = points - 1; i >= 0; i--) {
+    const t = new Date(now - i * 3 * 60 * 1000);
+    base += Math.floor(Math.random() * 3);
+    series.push({
+      time: t.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+      messages: base + Math.floor(Math.random() * 5),
+      scams: Math.floor(base * 0.65 + Math.random() * 3),
+      sessions: Math.floor(base * 0.4 + Math.random() * 2),
+    });
+  }
+  return series;
 }

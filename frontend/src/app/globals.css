@@ -1,9 +1,9 @@
 :root {
   /* Cybercrime/Honeypot Theme - Dark Mode */
-  --bg-primary: #0a0e14;
-  --bg-secondary: #0f141a;
-  --bg-tertiary: #1a1f2a;
-  --bg-hover: #252b38;
+  --bg-primary: #05080a;
+  --bg-secondary: #0a0e14;
+  --bg-tertiary: #151920;
+  --bg-hover: #1f2530;
   
   --border-primary: #2d3542;
   --border-secondary: #1a1f2a;
@@ -72,7 +72,7 @@
 }
 
 body {
-  background-color: var(--bg-primary);
+  background-color: #05080a;
   color: var(--text-primary);
   font-family: 'Courier New', 'Fira Code', monospace;
   font-size: 14px;

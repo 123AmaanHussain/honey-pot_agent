@@ -80,6 +80,17 @@ webhook_manager.py
 test_organizer_format.py
 test_api.bat
 test_api.sh
+test_api_detection.py
+test_llm_detection.py
+test_multi_llm.py
+
+# Test output / evaluation cache
+multi_llm_test_results.json
+tests/eval_cache.json
+tests/evaluation_report.md
+
+# Temporary reports
+MODEL_COMPARISON_REPORT.md
 
 # Frontend specific
 frontend/.next/

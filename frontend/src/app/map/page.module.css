@@ -1,0 +1,85 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.mapSection { width: 100%; }
+
+/* ─── Info Grid ──────────────────────────────────────────────────── */
+.infoSection { width: 100%; }
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 1100px) { .infoGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .infoGrid { grid-template-columns: 1fr; } }
+
+.infoCard {
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid rgba(45, 53, 66, 0.7);
+  border-radius: 10px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.infoCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.infoCard:hover {
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.07);
+}
+
+.infoCard:hover::before { opacity: 0.7; }
+
+.infoIcon { font-size: 1.5rem; }
+
+.infoTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #00d4ff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.infoText {
+  font-size: 0.72rem;
+  color: #8b949e;
+  line-height: 1.6;
+}

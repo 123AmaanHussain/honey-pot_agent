@@ -21,7 +21,7 @@ export default function MatrixRain() {
     window.addEventListener('resize', resizeCanvas);
 
     // Matrix rain configuration
-    const fontSize = 14;
+    const fontSize = 16;
     const columns = canvas.width / fontSize;
     const drops = Array(Math.floor(columns)).fill(1);
     
@@ -66,8 +66,8 @@ export default function MatrixRain() {
         left: 0,
         width: '100%',
         height: '100%',
-        zIndex: -1,
-        opacity: 0.15,
+        zIndex: -4,
+        opacity: 0.3,
         pointerEvents: 'none'
       }}
     />

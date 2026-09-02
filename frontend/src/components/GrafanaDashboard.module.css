@@ -1,0 +1,449 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ─── Toolbar ────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background: rgba(5, 8, 10, 0.9);
+  border: 1px solid rgba(244, 104, 0, 0.3);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  backdrop-filter: blur(12px);
+}
+
+.toolbarLeft,
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.grafanaLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #F46800;
+  text-shadow: 0 0 10px rgba(244, 104, 0, 0.5);
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 0.5rem;
+}
+
+.timeRanges,
+.refreshOpts {
+  display: flex;
+  gap: 2px;
+  background: rgba(10, 14, 20, 0.8);
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.rangeBtn {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-family: 'Courier New', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.rangeBtn:hover { color: #e0e6ed; background: rgba(0, 255, 136, 0.08); }
+
+.rangeBtnActive {
+  background: rgba(244, 104, 0, 0.18) !important;
+  color: #F46800 !important;
+  box-shadow: 0 0 6px rgba(244, 104, 0, 0.2);
+}
+
+.refreshLabel {
+  font-size: 0.68rem;
+  color: #6e7681;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.refreshSpin {
+  display: inline-block;
+  animation: spin 0.6s linear;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.promBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(244, 104, 0, 0.12);
+  border: 1px solid rgba(244, 104, 0, 0.35);
+  color: #F46800;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.28rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.promBtn:hover {
+  background: rgba(244, 104, 0, 0.22);
+  box-shadow: 0 0 10px rgba(244, 104, 0, 0.25);
+}
+
+/* ─── Query Bar ───────────────────────────────────────────────────── */
+.queryBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(5, 8, 10, 0.8);
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.queryIcon {
+  color: #F46800;
+  font-size: 1rem;
+}
+
+.queryInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #00ff88;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  caret-color: #00ff88;
+}
+
+.queryInput::placeholder { color: #6e7681; }
+
+.queryBtn {
+  background: rgba(0, 255, 136, 0.12);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  color: #00ff88;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.28rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.queryBtn:hover {
+  background: rgba(0, 255, 136, 0.22);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.25);
+}
+
+.queryResult {
+  background: rgba(5, 8, 10, 0.95);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  position: relative;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.queryResult pre {
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: #00ff88;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.closeResult {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+/* ─── Stat Row ───────────────────────────────────────────────────── */
+.statRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 1100px) { .statRow { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px)  { .statRow { grid-template-columns: repeat(2, 1fr); } }
+
+.statPanel {
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.statPanel:hover {
+  border-color: rgba(0, 255, 136, 0.25);
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.08);
+}
+
+.statPromQL {
+  font-size: 0.58rem;
+  color: #6e7681;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statValue {
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-family: 'Courier New', monospace;
+  line-height: 1;
+  text-shadow: 0 0 12px currentColor;
+}
+
+.statUnit {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-left: 1px;
+}
+
+.statTitle {
+  font-size: 0.65rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 0.3rem;
+}
+
+.statDelta {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.deltaUp { color: #00ff88; }
+.deltaDown { color: #ff4757; }
+
+/* ─── Charts Grid ────────────────────────────────────────────────── */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 900px) { .chartsGrid { grid-template-columns: 1fr; } }
+
+.chartPanel {
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  border-radius: 8px;
+  padding: 0.85rem;
+  transition: border-color 0.2s ease;
+}
+
+.chartPanel:hover {
+  border-color: rgba(244, 104, 0, 0.25);
+}
+
+.chartPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.chartTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #e0e6ed;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.chartMeta {
+  font-size: 0.62rem;
+  color: #6e7681;
+  font-family: 'Courier New', monospace;
+}
+
+/* ─── Gauges ─────────────────────────────────────────────────────── */
+.gaugesRow {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.gaugeLabel {
+  font-size: 0.62rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+/* ─── Tooltip ────────────────────────────────────────────────────── */
+.tooltip {
+  background: rgba(5, 8, 10, 0.95);
+  border: 1px solid rgba(45, 53, 66, 0.9);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-family: 'Courier New', monospace;
+}
+
+.tooltipTime {
+  font-size: 0.65rem;
+  color: #6e7681;
+  margin-bottom: 0.3rem;
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+}
+
+.tooltipDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltipName { color: #8b949e; flex: 1; }
+.tooltipVal  { font-weight: 700; min-width: 30px; text-align: right; }
+
+/* ─── Prometheus Modal ───────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 10, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal {
+  background: #05080a;
+  border: 1px solid rgba(244, 104, 0, 0.4);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(244, 104, 0, 0.2);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid rgba(45, 53, 66, 0.8);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #F46800;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.copyBtn {
+  background: rgba(0, 255, 136, 0.12);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  color: #00ff88;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyBtn:hover { background: rgba(0, 255, 136, 0.22); }
+
+.closeBtn {
+  background: transparent;
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  color: #8b949e;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.closeBtn:hover { color: #ff4757; border-color: #ff4757; }
+
+.modalBody {
+  overflow-y: auto;
+  flex: 1;
+  padding: 1rem 1.25rem;
+}
+
+.promOutput {
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: #00ff88;
+  white-space: pre;
+  line-height: 1.7;
+}
+
+.modalFooter {
+  padding: 0.65rem 1.25rem;
+  border-top: 1px solid rgba(45, 53, 66, 0.6);
+  font-size: 0.65rem;
+  color: #6e7681;
+}
+
+.scrapeUrl code {
+  color: #F46800;
+  font-family: 'Courier New', monospace;
+  font-size: 0.65rem;
+}

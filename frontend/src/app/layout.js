@@ -3,6 +3,7 @@ import styles from './layout.module.css';
 import Sidebar from '../components/Sidebar';
 import { ThemeProvider } from '../lib/ThemeContext';
 import MatrixRain from '../components/MatrixRain';
+import HackerWatermark from '../components/HackerWatermark';
 import CyberEffects from '../components/CyberEffects';
 
 export const metadata = {
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <ThemeProvider>
+          <HackerWatermark />
           <MatrixRain />
           <CyberEffects />
           <div className={styles.layoutContainer}>

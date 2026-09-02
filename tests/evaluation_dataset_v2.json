@@ -1,0 +1,694 @@
+{
+  "description": "Comprehensive evaluation dataset for Honey-Pot scam detection system",
+  "version": "2.0",
+  "test_messages": [
+    {
+      "id": "phishing_01",
+      "label": "scam",
+      "category": "phishing",
+      "severity": "high",
+      "message": "URGENT: Your SBI account will be suspended within 2 hours. Verify immediately at sbi-verify.co.in or call 9876543210",
+      "expected_detection": true
+    },
+    {
+      "id": "phishing_02",
+      "label": "scam",
+      "category": "phishing",
+      "severity": "high",
+      "message": "Dear customer, your HDFC Bank account has been locked due to suspicious login from Lagos, Nigeria. Click here to unlock: hdfc-unlock.in",
+      "expected_detection": true
+    },
+    {
+      "id": "phishing_03",
+      "label": "scam",
+      "category": "phishing",
+      "severity": "critical",
+      "message": "Your OTP for transaction of Rs 49,999 is 583921. Share this OTP with our executive for verification. Do it NOW.",
+      "expected_detection": true
+    },
+    {
+      "id": "phishing_04",
+      "label": "scam",
+      "category": "phishing",
+      "severity": "high",
+      "message": "Paytm Alert: Your KYC has expired. Complete KYC within 24 hours or your wallet will be deactivated. Send your Aadhaar number to verify.",
+      "expected_detection": true
+    },
+    {
+      "id": "phishing_05",
+      "label": "scam",
+      "category": "phishing",
+      "severity": "high",
+      "message": "ICICI Bank: Unusual transaction of Rs 15,000 detected on your account. If this was NOT you, call our fraud helpline immediately: 9012345678",
+      "expected_detection": true
+    },
+    {
+      "id": "phishing_06",
+      "label": "scam",
+      "category": "phishing",
+      "severity": "medium",
+      "message": "Google Pay: Your account requires re-verification. Send OTP to 8765432100 to continue using UPI services",
+      "expected_detection": true
+    },
+    {
+      "id": "phishing_07",
+      "label": "scam",
+      "category": "phishing",
+      "severity": "high",
+      "message": "WARNING: Someone tried to access your PhonePe wallet from an unknown device in Karachi. Block immediately by sharing your PIN with our security team.",
+      "expected_detection": true
+    },
+    {
+      "id": "phishing_08",
+      "label": "scam",
+      "category": "phishing",
+      "severity": "medium",
+      "message": "Your Aadhaar has been linked to 3 unknown bank accounts. This is a security threat. Share your Aadhaar OTP to de-link immediately.",
+      "expected_detection": true
+    },
+    {
+      "id": "prize_01",
+      "label": "scam",
+      "category": "prize_lottery",
+      "severity": "high",
+      "message": "Congratulations! You have won Rs 50,00,000 in the IPL Mega Jackpot Draw! To claim your prize, pay a processing fee of Rs 999 to UPI: winner@paytm",
+      "expected_detection": true
+    },
+    {
+      "id": "prize_02",
+      "label": "scam",
+      "category": "prize_lottery",
+      "severity": "high",
+      "message": "Lucky Draw Winner! Your mobile number has been randomly selected for a brand new iPhone 15 Pro. Pay delivery charge of Rs 1,500 to claim.",
+      "expected_detection": true
+    },
+    {
+      "id": "prize_03",
+      "label": "scam",
+      "category": "prize_lottery",
+      "severity": "critical",
+      "message": "FINAL NOTICE: Your lottery prize of Rs 10,00,000 from Jio Lottery will expire today at midnight. Send your bank details and Aadhaar to claim NOW.",
+      "expected_detection": true
+    },
+    {
+      "id": "prize_04",
+      "label": "scam",
+      "category": "prize_lottery",
+      "severity": "medium",
+      "message": "You have been selected for Amazon Great Indian Festival cashback of Rs 25,000. Send your bank account number to receive the money.",
+      "expected_detection": true
+    },
+    {
+      "id": "prize_05",
+      "label": "scam",
+      "category": "prize_lottery",
+      "severity": "high",
+      "message": "Dear lucky winner, you won a Tata Safari car in an online lucky draw! Pay Rs 2,500 insurance fee to Ramesh Kumar at 9871234567@ybl to claim.",
+      "expected_detection": true
+    },
+    {
+      "id": "prize_06",
+      "label": "scam",
+      "category": "prize_lottery",
+      "severity": "medium",
+      "message": "HURRY! You are the 1,00,000th visitor! Claim your prize of Rs 75,000 by sharing your UPI ID within the next 30 minutes.",
+      "expected_detection": true
+    },
+    {
+      "id": "banking_01",
+      "label": "scam",
+      "category": "banking_upi",
+      "severity": "critical",
+      "message": "UPI Payment of Rs 25,000 initiated to scammer@okhdfcbank. If this was NOT you, call 1800-XXX-XXXX immediately to block.",
+      "expected_detection": true
+    },
+    {
+      "id": "banking_02",
+      "label": "scam",
+      "category": "banking_upi",
+      "severity": "high",
+      "message": "Bank officer here. Your loan application for Rs 10,00,000 has been approved. Send processing fee of Rs 5,000 to proceed with disbursement.",
+      "expected_detection": true
+    },
+    {
+      "id": "banking_03",
+      "label": "scam",
+      "category": "banking_upi",
+      "severity": "high",
+      "message": "SBI: Rs 1,50,000 has been credited to your account from unknown source. To receive this money, send your account number and IFSC code.",
+      "expected_detection": true
+    },
+    {
+      "id": "banking_04",
+      "label": "scam",
+      "category": "banking_upi",
+      "severity": "medium",
+      "message": "Your bank account has been frozen due to suspicious activity. Pay Rs 2,500 penalty to this UPI to unfreeze: fine@oksbi",
+      "expected_detection": true
+    },
+    {
+      "id": "banking_05",
+      "label": "scam",
+      "category": "banking_upi",
+      "severity": "critical",
+      "message": "A new UPI mandate of Rs 49,999 has been created on your account by Rajesh Kumar. If you did NOT authorize this, cancel immediately by calling 9876543210.",
+      "expected_detection": true
+    },
+    {
+      "id": "banking_06",
+      "label": "scam",
+      "category": "banking_upi",
+      "severity": "high",
+      "message": "Tax refund of Rs 50,000 pending from Income Tax Department. Pay Rs 500 processing fee via Google Pay to 9876543210 to receive.",
+      "expected_detection": true
+    },
+    {
+      "id": "tech_01",
+      "label": "scam",
+      "category": "tech_support",
+      "severity": "high",
+      "message": "Microsoft Security Alert: Your Windows license has expired. Call +91-9876543210 immediately or your PC will be locked permanently.",
+      "expected_detection": true
+    },
+    {
+      "id": "tech_02",
+      "label": "scam",
+      "category": "tech_support",
+      "severity": "high",
+      "message": "URGENT: Your computer has been infected with 5 critical viruses! 12 personal files are at risk. Download our antivirus tool NOW to protect your data.",
+      "expected_detection": true
+    },
+    {
+      "id": "tech_03",
+      "label": "scam",
+      "category": "tech_support",
+      "severity": "medium",
+      "message": "Apple Support: Your iCloud account has been compromised. Someone in Russia is accessing your photos. Verify your identity by calling our number.",
+      "expected_detection": true
+    },
+    {
+      "id": "tech_04",
+      "label": "scam",
+      "category": "tech_support",
+      "severity": "high",
+      "message": "Amazon Prime Alert: Your subscription will auto-renew at Rs 9,999 tomorrow. Cancel by calling 1800-XXX or reply STOP to this message.",
+      "expected_detection": true
+    },
+    {
+      "id": "tech_05",
+      "label": "scam",
+      "category": "tech_support",
+      "severity": "medium",
+      "message": "WARNING: Someone is accessing your webcam remotely. Your private activities are being recorded. Download SecurityShield Pro immediately to stop this.",
+      "expected_detection": true
+    },
+    {
+      "id": "romance_01",
+      "label": "scam",
+      "category": "romance",
+      "severity": "high",
+      "message": "I love you so much dear but I am stuck in Dubai without money. My family is in danger. Please send Rs 30,000 to my friend's UPI: emergency@paytm",
+      "expected_detection": true
+    },
+    {
+      "id": "romance_02",
+      "label": "scam",
+      "category": "romance",
+      "severity": "high",
+      "message": "Hi sweetheart, I am a UN peacekeeping doctor in Syria. I found a box with $500,000 but need your help to transfer it. Send Rs 10,000 for clearance fee.",
+      "expected_detection": true
+    },
+    {
+      "id": "romance_03",
+      "label": "scam",
+      "category": "romance",
+      "severity": "medium",
+      "message": "My dear, I want to marry you but first I need money for my passport and visa. Can you send Rs 15,000 to my sister's account? I will repay you.",
+      "expected_detection": true
+    },
+    {
+      "id": "romance_04",
+      "label": "scam",
+      "category": "romance",
+      "severity": "high",
+      "message": "Baby, my mother is very sick and needs surgery urgently. The hospital is asking Rs 50,000. Can you help me? I will pay you back I promise.",
+      "expected_detection": true
+    },
+    {
+      "id": "romance_05",
+      "label": "scam",
+      "category": "romance",
+      "severity": "medium",
+      "message": "I have been chatting with you for months and I really trust you. But I need Rs 5,000 for a medical emergency right now. Please send to GooglePay.",
+      "expected_detection": true
+    },
+    {
+      "id": "job_01",
+      "label": "scam",
+      "category": "job",
+      "severity": "high",
+      "message": "Congratulations! You are selected for Data Entry job at Rs 35,000/month salary. Send Rs 500 registration fee to confirm your position.",
+      "expected_detection": true
+    },
+    {
+      "id": "job_02",
+      "label": "scam",
+      "category": "job",
+      "severity": "medium",
+      "message": "Work from home opportunity: Earn Rs 50,000/day! No experience needed. Part-time typing job. Join now by paying Rs 200 for ID card.",
+      "expected_detection": true
+    },
+    {
+      "id": "job_03",
+      "label": "scam",
+      "category": "job",
+      "severity": "high",
+      "message": "Government job guaranteed! SSC/UPSC selection guaranteed in 30 days. Our proven method works. Pay Rs 999 now to enroll.",
+      "expected_detection": true
+    },
+    {
+      "id": "job_04",
+      "label": "scam",
+      "category": "job",
+      "severity": "medium",
+      "message": "Your profile has been shortlisted for Amazon remote job. Salary: Rs 40,000/month. Send resume and Aadhaar photo to proceed.",
+      "expected_detection": true
+    },
+    {
+      "id": "job_05",
+      "label": "scam",
+      "category": "job",
+      "severity": "high",
+      "message": "Part-time earning job available. Earn Rs 2,000 daily by doing simple tasks on your phone. Pay Rs 300 security deposit to start today.",
+      "expected_detection": true
+    },
+    {
+      "id": "advance_01",
+      "label": "scam",
+      "category": "advance_fee",
+      "severity": "high",
+      "message": "You have been shortlisted for a personal loan of Rs 10,00,000 from Bajaj Finance. Pay Rs 10,000 processing fee to your assigned officer Mr. Sharma.",
+      "expected_detection": true
+    },
+    {
+      "id": "advance_02",
+      "label": "scam",
+      "category": "advance_fee",
+      "severity": "high",
+      "message": "International parcel containing Rs 50 lakh from your uncle in London has arrived at Mumbai customs. Pay Rs 15,000 customs duty to release.",
+      "expected_detection": true
+    },
+    {
+      "id": "advance_03",
+      "label": "scam",
+      "category": "advance_fee",
+      "severity": "medium",
+      "message": "CBI investigation requires your cooperation. Your Aadhaar is linked to suspicious transactions. Pay Rs 10,000 investigation fee to prove innocence.",
+      "expected_detection": true
+    },
+    {
+      "id": "advance_04",
+      "label": "scam",
+      "category": "advance_fee",
+      "severity": "high",
+      "message": "Your passport is ready for collection at Delhi RPO. Pay Rs 3,000 courier charges to 9876543210@paytm for home delivery.",
+      "expected_detection": true
+    },
+    {
+      "id": "authority_01",
+      "label": "scam",
+      "category": "authority_impersonation",
+      "severity": "critical",
+      "message": "This is the CBI calling. Your Aadhaar number 1234-5678-9012 has been linked to money laundering worth Rs 2 crore. Share your OTP to verify.",
+      "expected_detection": true
+    },
+    {
+      "id": "authority_02",
+      "label": "scam",
+      "category": "authority_impersonation",
+      "severity": "critical",
+      "message": "Supreme Court notice: Your SIM will be permanently deactivated within 24 hours due to legal case pending. Verify by calling 9876543210 immediately.",
+      "expected_detection": true
+    },
+    {
+      "id": "authority_03",
+      "label": "scam",
+      "category": "authority_impersonation",
+      "severity": "high",
+      "message": "Income Tax Department: Outstanding tax of Rs 75,000 on your PAN card. Pay immediately via UPI or a team will visit your home for arrest.",
+      "expected_detection": true
+    },
+    {
+      "id": "authority_04",
+      "label": "scam",
+      "category": "authority_impersonation",
+      "severity": "high",
+      "message": "Police complaint filed against your mobile number for sending abusive messages. Pay Rs 5,000 fine to this account to dismiss the FIR.",
+      "expected_detection": true
+    },
+    {
+      "id": "authority_05",
+      "label": "scam",
+      "category": "authority_impersonation",
+      "severity": "critical",
+      "message": "TRAI Alert: Your mobile number will be deactivated in 24 hours due to new KYC regulations. Share your Aadhaar OTP to continue service.",
+      "expected_detection": true
+    },
+    {
+      "id": "blackmail_01",
+      "label": "scam",
+      "category": "blackmail",
+      "severity": "critical",
+      "message": "We have recorded your private activities from your phone camera. Pay Rs 5,000 to this UPI within 24 hours or we share everything with your contacts.",
+      "expected_detection": true
+    },
+    {
+      "id": "blackmail_02",
+      "label": "scam",
+      "category": "blackmail",
+      "severity": "critical",
+      "message": "I have hacked your WhatsApp and have all your private chats and photos. Send Rs 10,000 or I will forward them to everyone in your contact list.",
+      "expected_detection": true
+    },
+    {
+      "id": "blackmail_03",
+      "label": "scam",
+      "category": "blackmail",
+      "severity": "high",
+      "message": "Your daughter's phone location has been tracked. We know where she is. Pay Rs 50,000 if you want her to be safe. No police.",
+      "expected_detection": true
+    },
+    {
+      "id": "blackmail_04",
+      "label": "scam",
+      "category": "blackmail",
+      "severity": "high",
+      "message": "We have proof that you visited certain websites. Pay Rs 3,000 to this number or we will send the browsing history to your family.",
+      "expected_detection": true
+    },
+    {
+      "id": "otp_01",
+      "label": "legitimate",
+      "category": "otp_notification",
+      "severity": "none",
+      "message": "Your OTP for login is 123456. Do NOT share this with anyone. Valid for 5 minutes.",
+      "expected_detection": false
+    },
+    {
+      "id": "otp_02",
+      "label": "legitimate",
+      "category": "otp_notification",
+      "severity": "none",
+      "message": "Axis Bank OTP: 567890 for Rs 2,500 debit. Do not share. If not requested, call 1800-XXX.",
+      "expected_detection": false
+    },
+    {
+      "id": "otp_03",
+      "label": "legitimate",
+      "category": "otp_notification",
+      "severity": "none",
+      "message": "Amazon OTP for order delivery: 432100. Share only with delivery person. Never share via phone or email.",
+      "expected_detection": false
+    },
+    {
+      "id": "otp_04",
+      "label": "legitimate",
+      "category": "otp_notification",
+      "severity": "none",
+      "message": "Google verification code: 987654. Do not share this code with anyone, including Google employees.",
+      "expected_detection": false
+    },
+    {
+      "id": "otp_05",
+      "label": "legitimate",
+      "category": "otp_notification",
+      "severity": "none",
+      "message": "PhonePe: Your OTP is 112233 for UPI registration. Valid for 3 minutes. Never share this OTP.",
+      "expected_detection": false
+    },
+    {
+      "id": "bankalert_01",
+      "label": "legitimate",
+      "category": "bank_alert",
+      "severity": "none",
+      "message": "Axis Bank: Rs 2,500 debited from A/c XX4521 for Amazon Pay. Avl Bal: Rs 15,842.00. Not you? Call 1800-XXX.",
+      "expected_detection": false
+    },
+    {
+      "id": "bankalert_02",
+      "label": "legitimate",
+      "category": "bank_alert",
+      "severity": "none",
+      "message": "SBI: Rs 50,000 credited to your A/c XX7890. Bal: Rs 2,34,500. Ref: TXN987654. Ignore if not expecting.",
+      "expected_detection": false
+    },
+    {
+      "id": "bankalert_03",
+      "label": "legitimate",
+      "category": "bank_alert",
+      "severity": "none",
+      "message": "HDFC Bank Credit Card: Rs 4,999 charged at Amazon.in on 01-Sep. Total due: Rs 12,450. Pay by 15th Sep.",
+      "expected_detection": false
+    },
+    {
+      "id": "bankalert_04",
+      "label": "legitimate",
+      "category": "bank_alert",
+      "severity": "none",
+      "message": "Kotak Mahindra Bank: Auto-debit of Rs 18,500 for home loan EMI processed on 01-Sep. A/c XX3456.",
+      "expected_detection": false
+    },
+    {
+      "id": "bankalert_05",
+      "label": "legitimate",
+      "category": "bank_alert",
+      "severity": "none",
+      "message": "ICICI Bank: UPI credit of Rs 500 from Priya Sharma (REF: UPI123456). Avl Bal: Rs 8,920.",
+      "expected_detection": false
+    },
+    {
+      "id": "personal_01",
+      "label": "legitimate",
+      "category": "personal_message",
+      "severity": "none",
+      "message": "Hey, are you coming to the party tonight? We're meeting at 8 PM at the usual place.",
+      "expected_detection": false
+    },
+    {
+      "id": "personal_02",
+      "label": "legitimate",
+      "category": "personal_message",
+      "severity": "none",
+      "message": "Mom said dinner is ready. Come home soon, she made your favourite paneer butter masala!",
+      "expected_detection": false
+    },
+    {
+      "id": "personal_03",
+      "label": "legitimate",
+      "category": "personal_message",
+      "severity": "none",
+      "message": "Happy Birthday! Wishing you a wonderful year ahead. Let's catch up over coffee this weekend.",
+      "expected_detection": false
+    },
+    {
+      "id": "personal_04",
+      "label": "legitimate",
+      "category": "personal_message",
+      "severity": "none",
+      "message": "Can you pick up milk on your way home? We also need vegetables if you have time.",
+      "expected_detection": false
+    },
+    {
+      "id": "personal_05",
+      "label": "legitimate",
+      "category": "personal_message",
+      "severity": "none",
+      "message": "Your parcel has been delivered. I kept it at the security desk. Please collect when you get home.",
+      "expected_detection": false
+    },
+    {
+      "id": "professional_01",
+      "label": "legitimate",
+      "category": "professional_work",
+      "severity": "none",
+      "message": "Meeting reminder: Project review meeting tomorrow at 10 AM in Conference Room B. Please bring your progress report.",
+      "expected_detection": false
+    },
+    {
+      "id": "professional_02",
+      "label": "legitimate",
+      "category": "professional_work",
+      "severity": "none",
+      "message": "Hi, the client presentation has been moved to Thursday. Please update the slide deck accordingly.",
+      "expected_detection": false
+    },
+    {
+      "id": "professional_03",
+      "label": "legitimate",
+      "category": "professional_work",
+      "severity": "none",
+      "message": "Your leave request for Sep 5-7 has been approved by your manager. Please plan your tasks accordingly.",
+      "expected_detection": false
+    },
+    {
+      "id": "professional_04",
+      "label": "legitimate",
+      "category": "professional_work",
+      "severity": "none",
+      "message": "Team lunch tomorrow at 1 PM at Taj Restaurant. Please confirm your attendance by today.",
+      "expected_detection": false
+    },
+    {
+      "id": "service_01",
+      "label": "legitimate",
+      "category": "service_notification",
+      "severity": "none",
+      "message": "Your Flipkart order #OD12345 has been shipped. Expected delivery: Sep 4. Track: flipkart.com/track",
+      "expected_detection": false
+    },
+    {
+      "id": "service_02",
+      "label": "legitimate",
+      "category": "service_notification",
+      "severity": "none",
+      "message": "Uber ride completed. Fare: Rs 245 paid via UPI. Rate your driver and share feedback on the app.",
+      "expected_detection": false
+    },
+    {
+      "id": "service_03",
+      "label": "legitimate",
+      "category": "service_notification",
+      "severity": "none",
+      "message": "Zomato: Your order has been confirmed! Estimated delivery: 35 minutes. Track live on the app.",
+      "expected_detection": false
+    },
+    {
+      "id": "service_04",
+      "label": "legitimate",
+      "category": "service_notification",
+      "severity": "none",
+      "message": "Swiggy: Your food is being prepared. Rider will pick up in 10 minutes. Enjoy your meal!",
+      "expected_detection": false
+    },
+    {
+      "id": "promo_01",
+      "label": "legitimate",
+      "category": "promotional",
+      "severity": "none",
+      "message": "Jio: Your data pack is expiring tomorrow. Recharge with 2GB/day plan at Rs 239. Visit jio.com to recharge.",
+      "expected_detection": false
+    },
+    {
+      "id": "promo_02",
+      "label": "legitimate",
+      "category": "promotional",
+      "severity": "none",
+      "message": "Big Sale is LIVE on Myntra! Up to 70% off on fashion. Shop now at myntra.com. T&C apply.",
+      "expected_detection": false
+    },
+    {
+      "id": "promo_03",
+      "label": "legitimate",
+      "category": "promotional",
+      "severity": "none",
+      "message": "Airtel: Special offer! Get 3 months free on annual broadband plan. Call 1800-XXX or visit airtel.in.",
+      "expected_detection": false
+    },
+    {
+      "id": "promo_04",
+      "label": "legitimate",
+      "category": "promotional",
+      "severity": "none",
+      "message": "Dominos: Order 1 pizza, get 1 free today only! Use code BOGO at checkout. Offer valid till midnight.",
+      "expected_detection": false
+    },
+    {
+      "id": "info_01",
+      "label": "legitimate",
+      "category": "informational",
+      "severity": "none",
+      "message": "Your electricity bill for August is Rs 1,245. Due date: Sep 30. Pay via any UPI app or visit the BESCOM office.",
+      "expected_detection": false
+    },
+    {
+      "id": "info_02",
+      "label": "legitimate",
+      "category": "informational",
+      "severity": "none",
+      "message": "Your PAN card has been linked to your Aadhaar successfully. Reference: PAN-AADHAR-123456.",
+      "expected_detection": false
+    },
+    {
+      "id": "info_03",
+      "label": "legitimate",
+      "category": "informational",
+      "severity": "none",
+      "message": "Water supply will be suspended on Sep 5 from 10 AM to 6 PM for maintenance. Please store water accordingly.",
+      "expected_detection": false
+    },
+    {
+      "id": "greeting_01",
+      "label": "legitimate",
+      "category": "greeting",
+      "severity": "none",
+      "message": "Good morning! Happy Diwali to you and your family. May this festival bring joy and prosperity.",
+      "expected_detection": false
+    },
+    {
+      "id": "greeting_02",
+      "label": "legitimate",
+      "category": "greeting",
+      "severity": "none",
+      "message": "Eid Mubarak! Wishing you and your loved ones a blessed and peaceful Eid.",
+      "expected_detection": false
+    },
+    {
+      "id": "greeting_03",
+      "label": "legitimate",
+      "category": "greeting",
+      "severity": "none",
+      "message": "Merry Christmas! Hope you have a wonderful holiday season with your family.",
+      "expected_detection": false
+    },
+    {
+      "id": "edge_01",
+      "label": "legitimate",
+      "category": "edge_case",
+      "severity": "none",
+      "message": "Hey, can you send me Rs 200 on GPay? I'm stuck without cash at the petrol pump. Will pay you back tomorrow.",
+      "expected_detection": false
+    },
+    {
+      "id": "edge_02",
+      "label": "legitimate",
+      "category": "edge_case",
+      "severity": "none",
+      "message": "Boss, can I get my salary in advance this month? My daughter's school fees is due. I will adjust next month.",
+      "expected_detection": false
+    },
+    {
+      "id": "edge_03",
+      "label": "legitimate",
+      "category": "edge_case",
+      "severity": "none",
+      "message": "I need to borrow Rs 5000 from you. I will return it next week when my salary comes. Please help.",
+      "expected_detection": false
+    },
+    {
+      "id": "edge_04",
+      "label": "scam",
+      "category": "edge_case",
+      "severity": "high",
+      "message": "Hi, I am your son. I lost my phone and using friend's phone. Please send Rs 5000 urgently to this number for an emergency.",
+      "expected_detection": true
+    },
+    {
+      "id": "edge_05",
+      "label": "legitimate",
+      "category": "edge_case",
+      "severity": "none",
+      "message": "Mom, I reached home safely. Don't worry. Will call you in the evening.",
+      "expected_detection": false
+    }
+  ]
+}

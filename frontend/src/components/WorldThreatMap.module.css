@@ -1,0 +1,379 @@
+.card {
+  background: rgba(10, 14, 20, 0.9);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.3s ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00d4ff, #00ff88, #00d4ff, transparent);
+  opacity: 0.7;
+}
+
+.card:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+}
+
+/* ─── Header ─────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e0e6ed;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.titleIcon { font-size: 1.1rem; }
+
+.liveTag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.12);
+  border: 1px solid rgba(255, 71, 87, 0.4);
+  border-radius: 4px;
+  padding: 1px 6px;
+  letter-spacing: 0.08em;
+  animation: liveFlash 1.5s ease infinite;
+}
+
+@keyframes liveFlash {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.headerStats {
+  display: flex;
+  gap: 1rem;
+}
+
+.headerStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.headerStatVal {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #00d4ff;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  line-height: 1;
+}
+
+.headerStatLabel {
+  font-size: 0.58rem;
+  color: #6e7681;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+/* ─── Loading ─────────────────────────────────────────────────────── */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem;
+  color: #8b949e;
+  font-size: 0.85rem;
+}
+
+.loadingSpinner {
+  width: 36px; height: 36px;
+  border: 3px solid rgba(0, 212, 255, 0.2);
+  border-top-color: #00d4ff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Body ───────────────────────────────────────────────────────── */
+.body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .body { grid-template-columns: 1fr; }
+}
+
+/* ─── Map ────────────────────────────────────────────────────────── */
+.mapContainer {
+  position: relative;
+  background: rgba(5, 8, 10, 0.8);
+  border: 1px solid rgba(45, 53, 66, 0.7);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 320px;
+}
+
+.mapSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ─── Tooltip ────────────────────────────────────────────────────── */
+.tooltip {
+  position: fixed;
+  background: rgba(5, 8, 10, 0.97);
+  border: 1px solid rgba(45, 53, 66, 0.9);
+  border-radius: 10px;
+  padding: 0.75rem;
+  z-index: 500;
+  pointer-events: none;
+  min-width: 170px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  font-family: 'Courier New', monospace;
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e0e6ed;
+  border-bottom: 1px solid;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tooltipRisk {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: auto;
+}
+
+.tooltipRows { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #8b949e;
+}
+
+.tooltipRow b { font-size: 0.8rem; }
+
+/* ─── Legend ─────────────────────────────────────────────────────── */
+.legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(5, 8, 10, 0.85);
+  border: 1px solid rgba(45, 53, 66, 0.7);
+  border-radius: 7px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legendDot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-size: 0.62rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-family: 'Courier New', monospace;
+}
+
+/* ─── Leaderboard ────────────────────────────────────────────────── */
+.leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.leaderboardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.leaderboardTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e0e6ed;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.filterRow {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.searchInput {
+  flex: 1;
+  background: rgba(5, 8, 10, 0.8);
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  border-radius: 6px;
+  color: #e0e6ed;
+  font-family: 'Courier New', monospace;
+  font-size: 0.68rem;
+  padding: 0.35rem 0.65rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus { border-color: rgba(0, 212, 255, 0.4); }
+.searchInput::placeholder { color: #6e7681; }
+
+.filterSelect {
+  background: rgba(5, 8, 10, 0.8);
+  border: 1px solid rgba(45, 53, 66, 0.8);
+  border-radius: 6px;
+  color: #e0e6ed;
+  font-family: 'Courier New', monospace;
+  font-size: 0.68rem;
+  padding: 0.35rem 0.5rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.leaderboardList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.leaderboardList::-webkit-scrollbar { width: 4px; }
+.leaderboardList::-webkit-scrollbar-track { background: rgba(5,8,10,0.5); border-radius: 4px; }
+.leaderboardList::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.25); border-radius: 4px; }
+
+.leaderboardRow {
+  display: grid;
+  grid-template-columns: 22px 22px 1fr auto;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(10, 14, 20, 0.7);
+  border: 1px solid transparent;
+  border-left: 3px solid;
+  border-radius: 7px;
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.leaderboardRow:hover {
+  background: rgba(0, 212, 255, 0.04);
+  border-color: rgba(0, 212, 255, 0.15);
+  border-left-color: inherit;
+}
+
+.leaderboardRowActive {
+  background: rgba(0, 212, 255, 0.06) !important;
+  border-color: rgba(0, 212, 255, 0.2) !important;
+  border-left-color: inherit !important;
+}
+
+.rowRank {
+  font-size: 0.68rem;
+  font-weight: 800;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+}
+
+.rowFlag { font-size: 0.9rem; text-align: center; }
+
+.rowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.rowName {
+  font-size: 0.72rem;
+  color: #e0e6ed;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowBar {
+  height: 3px;
+  background: rgba(45, 53, 66, 0.6);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.rowBarFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.rowStats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.rowMsgs {
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-family: 'Courier New', monospace;
+}
+
+.rowRiskBadge {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 1px 4px;
+  text-transform: uppercase;
+}
