@@ -229,56 +229,64 @@ def detect_scam_llm(message: str, message_history: List[Dict] = None, sender_inf
     
     # Build LLM prompt for scam detection
     prompt = f"""
-You are an expert scam detection AI. Analyze the following message to determine if it's a scam.
+You are an expert scam detection AI. Analyze the CURRENT MESSAGE to determine if it is a scam.
+
+CRITICAL RULE: You are analyzing ONLY the CURRENT MESSAGE below. Do NOT flag messages as scam just because the conversation history contains scam-like content. Judge each message on its own merits.
 
 SENDER INFORMATION:
 {sender_text if sender_text else "No sender information provided"}
 
-CONVERSATION HISTORY:
+CONVERSATION HISTORY (for context only — do NOT use to flag the current message):
 {history_text if history_text else "No conversation history"}
 {fewshot_section}
 CURRENT MESSAGE TO ANALYZE:
 "{message}"
 
-ANALYZE THE FOLLOWING FACTORS:
+ANALYSIS STEPS:
 
-1. SENDER ANALYSIS:
-   - Is the sender email/phone from a legitimate domain or suspicious?
-   - Does the sender name match known organizations or seem suspicious?
-   - Is the sender profile information consistent and legitimate?
+STEP 1: Is the current message a greeting, casual chat, or friendly message?
+   - "Hello", "Hey", "How are you?", "Good morning", "Happy birthday" → LIKELY LEGITIMATE
+   - Do NOT flag greetings as scam just because later messages in history ask for money
 
-2. MESSAGE CONTENT ANALYSIS:
-   - Does the message ask for money, personal information, or sensitive data?
-   - Does it create urgency or threaten consequences?
-   - Does it offer prizes, rewards, or too-good-to-be-true opportunities?
-   - Does it impersonate legitimate organizations (banks, government, tech support)?
+STEP 2: Does the current message contain ANY of these scam indicators?
+   - Asks for money, UPI, bank details, OTP, or personal information
+   - Creates urgency ("send NOW", "within 24 hours", "immediately")
+   - Threatens consequences ("account blocked", "legal action", "arrest")
+   - Offers prizes/lottery requiring payment
+   - Impersonates authority (CBI, police, bank officer)
 
-3. CONTEXT ANALYSIS:
-   - Is the message consistent with previous conversation?
-   - Does it follow typical scam patterns (advance fee, phishing, impersonation)?
+STEP 3: Conversation flow analysis
+   - If the scammer built trust first (greetings, casual chat) THEN later asks for money, that is a ROMANCE or TRUST-BUILDING scam pattern
+   - The FIRST greeting message is NOT a scam — it's the trust-building phase
+   - The SCAM begins when money/personal info is requested
 
-4. LEGITIMATE INDICATORS:
-   - Messages from known institutions (colleges, banks) about routine payments
-   - Proper institutional language and contact information
-   - No false urgency or unusual payment methods
-   - Consistent sender information and profile
-   - Bank transaction alerts (credits, debits, EMI) from known banks are usually legitimate
-   - OTP messages are usually legitimate transaction verifications
+STEP 4: Minimum evidence requirement
+   - A message needs AT LEAST 2 scam indicators to be flagged as scam
+   - Single keywords like "account" or "money" alone are NOT enough
+   - Casual conversation about money ("I need money for rent") is NOT a scam
 
-SCAM INDICATORS:
-- Suspicious sender emails (free domains, misspellings, random characters)
-- Requests for payment via unusual methods (gift cards, crypto, wire transfers)
-- Urgency/threats combined with requests for information
-- Prize/lottery claims requiring payment or personal details
-- Impersonation of legitimate organizations with slight variations
-- Poor grammar/spelling combined with financial requests
+LEGITIMATE INDICATORS (mark as NOT scam if these apply):
+- Bank transaction alerts (credits, debits, EMI) from known banks
+- OTP messages for transaction verification
+- Greetings, casual conversation, friendly messages
+- Messages from known contacts about routine matters
+- Work-related messages (meetings, deadlines, projects)
+- Service notifications (delivery, orders, ride completion)
+
+SCAM INDICATORS (mark as scam if 2+ present):
+- Requests for money via UPI/crypto/gift cards
+- Urgency + threat combination
+- Prize/lottery requiring payment to claim
+- Authority impersonation demanding payment
+- Requests for OTP or bank PIN
+- Phishing links or suspicious URLs
 
 Provide your analysis in this EXACT format:
 IS_SCAM: [true/false]
 CONFIDENCE: [0.0 to 1.0]
 FLAGS: [comma-separated list of detected indicators]
-REASONING: [detailed explanation including sender analysis]
-SCAM_TYPE: [one of: PHISHING, IMPERSONATION, FINANCIAL_FRAUD, TECH_SUPPORT, PRIZE_SCAM, LOTTERY_SCAM, ADVANCE_FEE_SCAM, LEGITIMATE, UNKNOWN]
+REASONING: [explain which step led to your conclusion]
+SCAM_TYPE: [one of: PHISHING, IMPERSONATION, FINANCIAL_FRAUD, TECH_SUPPORT, PRIZE_SCAM, LOTTERY_SCAM, ADVANCE_FEE_SCAM, TRUST_BUILDING, LEGITIMATE, UNKNOWN]
 """
     
     # LLM-based detection only (no rule-based fallback)
