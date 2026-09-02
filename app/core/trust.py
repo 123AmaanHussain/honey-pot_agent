@@ -174,7 +174,15 @@ def _calculate_trust_level(profile: dict) -> str:
 
 def classify_message_type(message: str) -> str:
     """Classify a message into a type for trust tracking."""
-    msg_lower = message.lower().strip()
+    msg_lower = " " + message.lower().strip() + " "
+
+    def has_word(word: str) -> bool:
+        """Word/phrase check that avoids partial matches (e.g. 'hi' in 'this')."""
+        # For multi-word phrases, just check substring (phrases are distinctive)
+        if " " in word.strip():
+            return word in msg_lower
+        # Single words: require word boundaries so 'hi' doesn't match 'this'
+        return f" {word} " in msg_lower or msg_lower.startswith(f" {word}")
 
     # Greetings
     greeting_words = [
@@ -182,7 +190,7 @@ def classify_message_type(message: str) -> str:
         "happy birthday", "congratulations", "how are you", "what's up",
         "namaste", "salaam", "bye", "good night", "see you",
     ]
-    if any(word in msg_lower for word in greeting_words):
+    if any(has_word(word) for word in greeting_words):
         return "greeting"
 
     # Money/personal info requests (scam indicators)
@@ -191,12 +199,12 @@ def classify_message_type(message: str) -> str:
         "credit card", "aadhaar", "pan card", "urgent", "immediately",
         "block", "suspended", "won", "prize", "lottery",
     ]
-    if any(word in msg_lower for word in scam_words):
+    if any(has_word(word) for word in scam_words):
         return "scam_indicator"
 
     # General requests
     request_words = ["can you", "please", "help me", "need", "send", "transfer"]
-    if any(word in msg_lower for word in request_words):
+    if any(has_word(word) for word in request_words):
         return "request"
 
     return "casual"

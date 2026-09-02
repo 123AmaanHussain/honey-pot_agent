@@ -185,16 +185,18 @@ def detect_scam_llm(message: str, message_history: List[Dict] = None, sender_inf
 
     except ImportError:
         pass  # feedback module not available
-
     # ──────────────────────────────────────────────────────────────────
-    # LAYER 1.5: Trust Profile — check sender history and behavior
+    # LAYER 1.5: Trust Profile — read sender history for context/override.
+    # (Profile is UPDATED with the real result AFTER detection so that
+    #  scam flags are recorded accurately.)
     # ──────────────────────────────────────────────────────────────────
     sender_context = ""
     trust_level = "unknown"
+    msg_type = "casual"
     try:
         from app.core.trust import (
             get_sender_context, classify_message_type,
-            update_trust_profile, get_trust_profile, TrustLevel
+            get_trust_profile, TrustLevel
         )
 
         phone = sender_info.get("sender_phone", "")
@@ -205,14 +207,8 @@ def detect_scam_llm(message: str, message_history: List[Dict] = None, sender_inf
         profile = get_trust_profile(phone=phone, name=name, session_id=session_id)
         trust_level = profile["trust_level"]
 
-        # Classify the current message type
+        # Classify the current message type (for later trust update)
         msg_type = classify_message_type(message)
-
-        # Update the trust profile with this message
-        update_trust_profile(
-            phone=phone, name=name, session_id=session_id,
-            message_type=msg_type, is_scam=False,  # Will update later if scam
-        )
 
         # Get context string for the LLM prompt
         sender_context = get_sender_context(phone=phone, name=name, session_id=session_id)
@@ -220,6 +216,16 @@ def detect_scam_llm(message: str, message_history: List[Dict] = None, sender_inf
         # TRUST-BASED OVERRIDE: Known contacts get benefit of doubt
         # If sender is TRUSTED and current message is casual/greeting → skip LLM
         if trust_level == TrustLevel.TRUSTED and msg_type in ("greeting", "casual"):
+            # Log this interaction + flag as clean (updates profile correctly)
+            try:
+                from app.core.trust import update_trust_profile
+                update_trust_profile(
+                    phone=phone, name=name, session_id=session_id,
+                    message_type=msg_type, is_scam=False,
+                    notes="TRUSTED contact, casual/greeting message — override",
+                )
+            except ImportError:
+                pass
             logger.info(
                 f"Trust override: TRUSTED sender with casual message — returning legitimate",
                 extra={"sender_key": profile["key"], "msg_type": msg_type},
@@ -419,6 +425,13 @@ SCAM_TYPE: [one of: PHISHING, IMPERSONATION, FINANCIAL_FRAUD, TECH_SUPPORT, PRIZ
                         "reasoning": result["reasoning"][:100]
                     }
                 )
+                # Record the detection result into the sender's trust profile
+                _record_trust(
+                    sender_info, msg_type,
+                    is_scam=result["is_scam"],
+                    confidence=result["confidence"],
+                    notes=f"LLM:{result['scam_type']}"
+                )
                 return result
             else:
                 logger.warning("Failed to parse LLM response")
@@ -434,6 +447,45 @@ SCAM_TYPE: [one of: PHISHING, IMPERSONATION, FINANCIAL_FRAUD, TECH_SUPPORT, PRIZ
         "reasoning": "LLM detection unavailable - unable to analyze message",
         "scam_type": "UNKNOWN"
     }
+
+
+def _record_trust(
+    sender_info: Dict,
+    msg_type: str,
+    is_scam: bool,
+    confidence: float,
+    notes: str = "",
+) -> None:
+    """
+    Record a detection result into the sender's trust profile.
+    Only writes for senders with identifying info (phone/name),
+    so random strangers without contact info aren't tracked.
+    
+    This runs AFTER detection, so scam flags are recorded accurately
+    and known contacts correctly escalate to SUSPICIOUS when compromised.
+    """
+    if not sender_info:
+        return
+    phone = sender_info.get("sender_phone", "")
+    name = sender_info.get("sender_name", "")
+    session_id = sender_info.get("session_id", "")
+    # Only track senders we can identify
+    if not (phone or name):
+        return
+    try:
+        from app.core.trust import update_trust_profile
+        update_trust_profile(
+            phone=phone,
+            name=name,
+            session_id=session_id,
+            message_type=msg_type,
+            is_scam=is_scam,
+            notes=f"{notes} | confidence={confidence}"
+        )
+    except ImportError:
+        pass
+    except Exception as e:
+        logger.warning(f"Failed to record trust: {e}")
 
 
 def parse_llm_detection_response(response: str) -> Dict:
