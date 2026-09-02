@@ -64,7 +64,7 @@ Immediate safe exit with zero further engagement:
 ### 📊 **Full Intelligence Extraction**
 - UPI IDs, Indian phone numbers (10-digit), bank account numbers (11-18 digits)
 - Phishing URLs, suspicious keywords
-- OCR-scanned text from images (via Gemini Vision)
+- *Image/vision OCR — reserved for a future enhancement, not active in the current build*
 
 ### 📈 **Analytics & Visualization**
 - **Real GeoJSON world threat map** (equirectangular projection) — live scam infrastructure clusters
@@ -313,7 +313,7 @@ MIT License — see the [LICENSE](LICENSE) file.
 ## 🙏 Acknowledgments
 
 - **Groq** — ultra-fast LLM inference (Qwen 3.8-27B)
-- **Google Gemini** — backup LLM + vision intelligence
+- **Google Gemini** — backup LLM (kept for future enhancement)
 - **FastAPI** — web framework
 - **Next.js / React** — modern dashboard
 
