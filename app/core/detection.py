@@ -190,10 +190,13 @@ def detect_scam_llm(message: str, message_history: List[Dict] = None, sender_inf
     # ──────────────────────────────────────────────────────────────────
     history_text = ""
     if message_history:
-        history_text = "\n".join([
-            f"{msg.get('sender', 'unknown')}: {msg.get('text', '')}"
-            for msg in message_history[-5:]  # Last 5 messages for context
-        ])
+        parts = []
+        for msg in message_history[-5:]:
+            if isinstance(msg, dict):
+                parts.append(f"{msg.get('sender', 'unknown')}: {msg.get('text', '')}")
+            else:
+                parts.append(str(msg))
+        history_text = "\n".join(parts)
     
     # Build sender information text
     sender_text = ""
