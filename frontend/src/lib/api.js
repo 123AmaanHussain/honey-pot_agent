@@ -466,3 +466,13 @@ export async function getFeedbackCorrections() {
 export async function getFeedbackPatterns() {
   return fetchWithAuth('/feedback/patterns');
 }
+
+// ── Trust Profiles ─────────────────────────────────────────────────
+
+export async function getTrustStats() {
+  return fetchWithAuth('/trust/stats');
+}
+
+export async function getTrustProfile(senderId) {
+  return fetchWithAuth(`/trust/profile/${encodeURIComponent(senderId)}`);
+}

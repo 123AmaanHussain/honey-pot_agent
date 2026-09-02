@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { getFeedbackStats, getFeedbackCorrections, submitFeedback } from '@/lib/api';
+import { getFeedbackStats, getFeedbackCorrections, submitFeedback, getTrustStats } from '@/lib/api';
 import styles from './page.module.css';
 
 export default function FeedbackPage() {
   const [stats, setStats] = useState(null);
+  const [trustStats, setTrustStats] = useState(null);
   const [corrections, setCorrections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -21,9 +22,10 @@ export default function FeedbackPage() {
 
   async function loadData() {
     setLoading(true);
-    const [s, c] = await Promise.all([getFeedbackStats(), getFeedbackCorrections()]);
+    const [s, c, t] = await Promise.all([getFeedbackStats(), getFeedbackCorrections(), getTrustStats()]);
     setStats(s);
     setCorrections(c?.corrections || []);
+    setTrustStats(t);
     setLoading(false);
   }
 
@@ -80,6 +82,35 @@ export default function FeedbackPage() {
           <div className={`${styles.statCard} ${styles.pattern}`}>
             <div className={styles.statValue}>{stats.patterns_extracted}</div>
             <div className={styles.statLabel}>Patterns Learned</div>
+          </div>
+        </div>
+      )}
+
+      {/* Trust Profile Stats */}
+      {trustStats && (
+        <div className={styles.trustSection}>
+          <h2 className={styles.sectionTitle}>Sender Trust Profiles</h2>
+          <p className={styles.trustDesc}>
+            The system tracks sender behavior over time. Known contacts get benefit of doubt.
+            Compromised accounts are detected when trusted senders suddenly act like scammers.
+          </p>
+          <div className={styles.trustGrid}>
+            <div className={styles.trustCard}>
+              <div className={styles.trustValue}>{trustStats.total_senders}</div>
+              <div className={styles.trustLabel}>Total Senders</div>
+            </div>
+            <div className={`${styles.trustCard} ${styles.trustKnown}`}>
+              <div className={styles.trustValue}>{trustStats.known}</div>
+              <div className={styles.trustLabel}>Known</div>
+            </div>
+            <div className={`${styles.trustCard} ${styles.trustTrusted}`}>
+              <div className={styles.trustValue}>{trustStats.trusted}</div>
+              <div className={styles.trustLabel}>Trusted</div>
+            </div>
+            <div className={`${styles.trustCard} ${styles.trustSuspicious}`}>
+              <div className={styles.trustValue}>{trustStats.suspicious}</div>
+              <div className={styles.trustLabel}>Suspicious</div>
+            </div>
           </div>
         </div>
       )}
