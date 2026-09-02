@@ -1367,6 +1367,76 @@ async def get_email_monitor_output(lines: int = 20):
 # Root Endpoint
 # -------------------------
 
+# -------------------------
+# Feedback / Self-Learning Endpoints
+# -------------------------
+
+@app.post("/feedback", tags=["Feedback"])
+async def submit_feedback(
+    request: Request,
+    api_key: str = Depends(verify_api_key),
+):
+    """
+    Submit a human correction for a false positive or false negative.
+    
+    Body:
+      message:           the original message text
+      correction_type:   "fp" (false positive) or "fn" (false negative)
+      original_prediction: what the model predicted (true=scam, false=legit)
+      actual_label:      what it actually was (true=scam, false=legit)
+      category:          optional category label
+      notes:             optional human explanation
+    """
+    from app.core.feedback import add_correction
+
+    body = await request.json()
+    message = body.get("message", "").strip()
+    correction_type = body.get("correction_type", "")
+
+    if not message:
+        raise HTTPException(status_code=400, detail="message is required")
+    if correction_type not in ("fp", "fn"):
+        raise HTTPException(status_code=400, detail="correction_type must be 'fp' or 'fn'")
+
+    entry = add_correction(
+        message=message,
+        correction_type=correction_type,
+        original_prediction=body.get("original_prediction", correction_type == "fp"),
+        actual_label=body.get("actual_label", correction_type == "fp"),
+        category=body.get("category", ""),
+        notes=body.get("notes", ""),
+    )
+
+    logger.info(f"Feedback received: {correction_type.upper()} for message '{message[:50]}...'")
+
+    return {
+        "status": "success",
+        "correction_id": entry["id"],
+        "message": f"Correction stored. The system will learn from this {correction_type.upper()}.",
+    }
+
+
+@app.get("/feedback/stats", tags=["Feedback"])
+async def feedback_stats(api_key: str = Depends(verify_api_key)):
+    """Get feedback statistics — corrections applied, patterns extracted, per-category breakdown."""
+    from app.core.feedback import get_feedback_stats
+    return get_feedback_stats()
+
+
+@app.get("/feedback/corrections", tags=["Feedback"])
+async def list_corrections(api_key: str = Depends(verify_api_key)):
+    """List all stored human corrections."""
+    from app.core.feedback import get_all_corrections
+    return {"corrections": get_all_corrections()}
+
+
+@app.get("/feedback/patterns", tags=["Feedback"])
+async def list_patterns(api_key: str = Depends(verify_api_key)):
+    """List extracted patterns from accumulated corrections."""
+    from app.core.feedback import get_patterns
+    return {"patterns": get_patterns()}
+
+
 @app.get("/", tags=["Info"])
 async def root():
     """

@@ -18,6 +18,7 @@ export default function Sidebar() {
     { href: '/simulator', label: 'Simulator', icon: '🎮' },
     { href: '/map', label: 'Threat Map', icon: '🌐' },
     { href: '/telemetry', label: 'Prometheus · Grafana', icon: '📡' },
+    { href: '/feedback', label: 'Self-Learning', icon: '🧠' },
   ];
 
 

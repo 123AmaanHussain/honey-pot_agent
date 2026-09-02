@@ -432,3 +432,37 @@ export async function getTimeseriesMetrics() {
   }
   return series;
 }
+
+// ── Feedback / Self-Learning ──────────────────────────────────────
+
+export async function submitFeedback({ message, correctionType, originalPrediction, actualLabel, category, notes }) {
+  const res = await fetch(`${API_URL}/feedback`, {
+    method: 'POST',
+    headers: {
+      'x-api-key': API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message,
+      correction_type: correctionType,
+      original_prediction: originalPrediction,
+      actual_label: actualLabel,
+      category: category || '',
+      notes: notes || '',
+    }),
+  });
+  if (!res.ok) throw new Error(`Feedback error: ${res.status}`);
+  return res.json();
+}
+
+export async function getFeedbackStats() {
+  return fetchWithAuth('/feedback/stats');
+}
+
+export async function getFeedbackCorrections() {
+  return fetchWithAuth('/feedback/corrections');
+}
+
+export async function getFeedbackPatterns() {
+  return fetchWithAuth('/feedback/patterns');
+}
