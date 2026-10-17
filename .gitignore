@@ -89,6 +89,9 @@ multi_llm_test_results.json
 tests/eval_cache.json
 tests/evaluation_report.md
 
+# Evaluation suite (internal, not required for deployment)
+evaluation_suite/
+
 # Temporary reports
 MODEL_COMPARISON_REPORT.md
 

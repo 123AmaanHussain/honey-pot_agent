@@ -1,0 +1,39 @@
+{
+  "senders": {
+    "unknown": {
+      "key": "unknown",
+      "phone": "",
+      "name": "",
+      "first_seen": "2026-09-30T17:12:33.496259",
+      "last_seen": "2026-09-30T17:12:33.496262",
+      "interaction_count": 0,
+      "message_types": {
+        "greetings": 0,
+        "casual": 0,
+        "requests": 0,
+        "scam_indicators": 0
+      },
+      "trust_level": "unknown",
+      "flags": [],
+      "notes": ""
+    },
+    "session:sim-3896": {
+      "key": "session:sim-3896",
+      "phone": null,
+      "name": null,
+      "first_seen": "2026-10-03T05:13:50.214634",
+      "last_seen": "2026-10-03T05:13:50.214685",
+      "interaction_count": 0,
+      "message_types": {
+        "greetings": 0,
+        "casual": 0,
+        "requests": 0,
+        "scam_indicators": 0
+      },
+      "trust_level": "unknown",
+      "flags": [],
+      "notes": ""
+    }
+  },
+  "updated_at": "2026-10-03T05:13:50.215907"
+}
